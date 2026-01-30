@@ -2,24 +2,135 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Prompt Gallery</title>
+<title>Nano Banana Prompt</title>
+
 <style>
-body { background:#111; color:#eee; font-family:sans-serif; }
-.card { border:1px solid #333; padding:15px; margin:15px; border-radius:8px; }
-img { max-width:200px; margin:5px; border-radius:6px; }
-.note { color:#aaa; font-size:13px; margin-top:10px; }
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family: Inter, system-ui, sans-serif;
+  background:#f6f7fb;
+  color:#111;
+}
+
+header {
+  background:white;
+  padding:20px 40px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+h1 { margin:0; font-size:36px; }
+
+.tabs {
+  display:flex;
+  gap:10px;
+  padding:20px 40px;
+}
+
+.tab {
+  padding:8px 16px;
+  border-radius:20px;
+  background:#eee;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.tab.active {
+  background:#111;
+  color:white;
+}
+
+.grid {
+  padding:40px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
+  gap:30px;
+}
+
+.card {
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  display:flex;
+  flex-direction:column;
+}
+
+.card img {
+  width:100%;
+  height:220px;
+  object-fit:cover;
+}
+
+.card-body {
+  padding:20px;
+  flex:1;
+}
+
+.category {
+  font-size:12px;
+  color:#3b82f6;
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+.title {
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.desc {
+  font-size:14px;
+  color:#555;
+  margin-bottom:16px;
+}
+
+.prompt-box {
+  background:#f1f2f5;
+  padding:10px;
+  border-radius:10px;
+  font-size:12px;
+  color:#333;
+  height:60px;
+  overflow:hidden;
+}
+
+.copy-btn {
+  margin:15px;
+  border:none;
+  background:#111;
+  color:white;
+  padding:12px;
+  border-radius:30px;
+  cursor:pointer;
+  font-size:14px;
+}
 </style>
 </head>
+
 <body>
 
-<h1>Prompt Gallery</h1>
-<div id="list"></div>
+<header>
+  <h1>🍌 Nano Banana Prompt</h1>
+</header>
+
+<div class="tabs">
+  <div class="tab active">All</div>
+  <div class="tab">Photorealism</div>
+  <div class="tab">E-commerce</div>
+  <div class="tab">Social Media</div>
+</div>
+
+<div class="grid" id="grid"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔴 ใส่ config ของคุณตรงนี้ */
 const app = initializeApp({
   apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
   projectId: "prompt-gallery-64aa9"
@@ -28,30 +139,28 @@ const app = initializeApp({
 const db = getFirestore(app);
 const snap = await getDocs(collection(db, "prompts"));
 
-const box = document.getElementById("list");
+const grid = document.getElementById("grid");
 
 snap.forEach(doc => {
   const d = doc.data();
+  const img = d.preview?.[0] || d.images?.[0] || "";
 
-  let previews = "";
-  if (d.preview) {
-    d.preview.forEach(url => {
-      previews += `<img src="${url}">`;
-    });
-  }
-
-  box.innerHTML += `
+  grid.innerHTML += `
     <div class="card">
-      <h2>${d.title}</h2>
-      ${previews}
-      <p>${d.prompt}</p>
-      <div class="note">
-        ${d.category} | ${d.created}<br>
-        ${d.note || ""}
+      <img src="${img}">
+      <div class="card-body">
+        <div class="category">${d.category}</div>
+        <div class="title">${d.title}</div>
+        <div class="desc">${d.note || ""}</div>
+        <div class="prompt-box">${d.prompt}</div>
       </div>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${d.prompt}\`)">
+        Copy Prompt
+      </button>
     </div>
   `;
 });
 </script>
+
 </body>
 </html>
