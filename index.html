@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Prompt Gallery</title>
+<style>
+body { background:#111; color:#eee; font-family:sans-serif; }
+.card { border:1px solid #333; padding:15px; margin:15px; border-radius:8px; }
+img { max-width:200px; margin:5px; border-radius:6px; }
+.note { color:#aaa; font-size:13px; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<h1>Prompt Gallery</h1>
+<div id="list"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔴 ใส่ config ของคุณตรงนี้ */
+const app = initializeApp({
+  apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
+  projectId: "prompt-gallery-64aa9"
+});
+
+const db = getFirestore(app);
+const snap = await getDocs(collection(db, "prompts"));
+
+const box = document.getElementById("list");
+
+snap.forEach(doc => {
+  const d = doc.data();
+
+  let previews = "";
+  if (d.preview) {
+    d.preview.forEach(url => {
+      previews += `<img src="${url}">`;
+    });
+  }
+
+  box.innerHTML += `
+    <div class="card">
+      <h2>${d.title}</h2>
+      ${previews}
+      <p>${d.prompt}</p>
+      <div class="note">
+        ${d.category} | ${d.created}<br>
+        ${d.note || ""}
+      </div>
+    </div>
+  `;
+});
+</script>
+</body>
+</html>
