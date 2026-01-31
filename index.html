@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://prompt-gallery.github.io/nano-banana-prompts/">
 
     <meta property="og:title" content="Nano Banana Prompts | AI Prompt Gallery & Generator">
-    <meta property="og:description" content="A curated AI prompt gallery and generator for creative content. Explore styles, save prompts, and generate stunning AI results.">
+    <meta property="og:description" content="A curated AI prompt gallery and generator. Explore styles, save prompts, and generate stunning AI results.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://prompt-gallery.github.io/nano-banana-prompts/">
     <meta property="og:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
@@ -41,25 +41,23 @@
     <style>
         /* Theme Configuration */
         :root {
-            --bg-body: #020202; /* Flat Black */
+            --bg-body: #020202;
             --bg-card: #090909;
             --border-color: #1a1a1a;
-            --accent: #FACC15;        /* Yellow-400 */
-            --accent-dim: #CA8A04;    /* Yellow-600 */
+            --accent: #FACC15;
+            --accent-dim: #CA8A04;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-body);
             color: #f1f1f1;
-            /* Subtle Grid Pattern instead of Gradient */
             background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
             linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
             background-size: 40px 40px;
             background-position: center top;
         }
 
-        /* Fade out grid at bottom */
         .bg-overlay {
             position: fixed;
             inset: 0;
@@ -68,13 +66,11 @@
             z-index: -1;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-body); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-        /* Card Styles */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -102,34 +98,22 @@
             transition: transform 0.3s ease;
         }
 
-        .card:hover::after {
-            transform: scaleX(1);
-        }
+        .card:hover::after { transform: scaleX(1); }
 
-        /* Image Hover Zoom */
-        .card-img-container {
-            overflow: hidden;
-        }
-        .card-img-container img.main-img {
-            transition: transform 0.5s ease;
-        }
-        .card:hover .card-img-container img.main-img {
-            transform: scale(1.05);
-        }
+        .card-img-container { overflow: hidden; }
+        .card-img-container img.main-img { transition: transform 0.5s ease; }
+        .card:hover .card-img-container img.main-img { transform: scale(1.05); }
 
-        /* Prompt Box Code Style */
         .prompt-code {
             font-family: 'JetBrains Mono', monospace;
             background: #000;
             border: 1px solid #222;
         }
 
-        /* Thumbnails Scrollbar */
         .thumb-scroll::-webkit-scrollbar { height: 4px; }
         .thumb-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
         .thumb-scroll { scrollbar-width: thin; scrollbar-color: #333 transparent; }
 
-        /* Toast Animation */
         @keyframes slideUpFade {
             from { transform: translate(-50%, 20px); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
@@ -295,7 +279,7 @@
             renderPagination();
         }
 
-        // Render Logic
+        // Render Logic (Fixed Bug here)
         function renderPagination() {
             grid.innerHTML = "";
 
@@ -313,42 +297,63 @@
             pageData.forEach(item => {
                 // Image handling
                 let images = [];
+                let hasImage = true;
+
                 if (Array.isArray(item.preview) && item.preview.length > 0) images = item.preview;
                 else if (Array.isArray(item.images) && item.images.length > 0) images = item.images;
                 else if (typeof item.preview === 'string') images = [item.preview];
-                if(images.length === 0) images = ["https://via.placeholder.com/400x300/0a0a0a/333?text=NANO"];
+                
+                if(images.length === 0) {
+                    hasImage = false;
+                    images = []; 
+                }
 
                 // Thumbnails logic
                 let thumbnailsHTML = '';
-                images.slice(0, 5).forEach((img, idx) => {
-                    // Active state border for first item
-                    const borderClass = idx === 0 ? 'border-yellow-500' : 'border-neutral-800';
-                    thumbnailsHTML += `
-                        <img src="${img}" 
-                             loading="lazy"
-                             onmouseover="this.parentElement.parentElement.querySelector('.main-img').src='${img}'; this.parentElement.querySelectorAll('img').forEach(el => el.classList.remove('border-yellow-500')); this.classList.add('border-yellow-500');"
-                             class="w-8 h-8 object-cover rounded-sm border ${borderClass} hover:border-white cursor-pointer transition bg-black"
-                             alt="t">
+                if (hasImage) {
+                    images.slice(0, 5).forEach((img, idx) => {
+                        const borderClass = idx === 0 ? 'border-yellow-500' : 'border-neutral-800';
+                        thumbnailsHTML += `
+                            <img src="${img}" 
+                                 loading="lazy"
+                                 onmouseover="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${img}'; this.parentElement.querySelectorAll('img').forEach(el => el.classList.remove('border-yellow-500')); this.classList.add('border-yellow-500');"
+                                 class="w-8 h-8 object-cover rounded-sm border ${borderClass} hover:border-white cursor-pointer transition bg-black"
+                                 alt="thumb">
+                        `;
+                    });
+                } else {
+                    thumbnailsHTML = `<span class="text-[10px] text-neutral-600 font-mono self-center">TEXT ONLY</span>`;
+                }
+
+                // Main Image HTML
+                let mainImageHTML;
+                if (hasImage) {
+                    mainImageHTML = `
+                        <img src="${images[0]}" 
+                             alt="${item.title}" loading="lazy" 
+                             class="main-img w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">
                     `;
-                });
+                } else {
+                    mainImageHTML = `
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
+                            <i class="fa-solid fa-bolt text-4xl text-neutral-800 group-hover:text-yellow-500/50 transition duration-500"></i>
+                            <span class="text-[10px] font-mono text-neutral-700 mt-2 tracking-widest uppercase group-hover:text-neutral-500">No Preview</span>
+                        </div>
+                    `;
+                }
 
                 // Safe prompt string
                 const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
                 
-                // Link Logic (รองรับหน้าใหม่ในอนาคต)
-                // เราใช้ <a> ครอบรูปภาพและชื่อเรื่อง เพื่อกดไปหน้า view.html
-                // ส่วนปุ่ม Copy แยกออกมาเพื่อไม่ให้ชนกัน
-                const detailLink = `view.html?id=${item.id}`; // ตัวอย่าง Link
+                // Link
+                const detailLink = `view.html?id=${item.id}`; 
 
                 const card = document.createElement('article');
                 card.className = "card rounded-xl flex flex-col h-full group";
                 
                 card.innerHTML = `
-                    <a href="${detailLink}" class="card-img-container block relative aspect-[4/3] bg-[#050505] border-b border-neutral-900 cursor-pointer">
-                        <img src="${images[0]}" 
-                             alt="${item.title}" loading="lazy" 
-                             class="main-img w-full h-full object-cover opacity-90 group-hover:opacity-100">
-                        
+                    <a href="${detailLink}" class="card-img-container block relative aspect-[4/3] bg-[#050505] border-b border-neutral-900 cursor-pointer overflow-hidden">
+                        ${mainImageHTML}
                         <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-white/10 z-10">
                             ${item.category || "General"}
                         </div>
@@ -359,7 +364,7 @@
                         <div class="flex items-center gap-1.5 mb-4 thumb-scroll overflow-x-auto h-9">
                             ${thumbnailsHTML}
                         </div>
-
+                        
                         <a href="${detailLink}" class="block mb-2 group-hover:text-yellow-400 transition-colors">
                             <h2 class="text-base font-bold text-white line-clamp-1" title="${item.title}">
                                 ${item.title || "Untitled"}
