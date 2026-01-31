@@ -180,12 +180,26 @@
                     <div class="grid grid-cols-2 gap-4 mt-auto border-t border-neutral-900 pt-6">
                         <div>
                             <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-1">Model</span>
-                            <span class="text-sm text-white font-mono">Midjourney / SD</span>
+                            <span class="text-sm text-white font-mono">Nano Banana Pro</span>
                         </div>
-                        <div>
-                            <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-1">Aspect Ratio</span>
-                            <span class="text-sm text-white font-mono">Default</span>
-                        </div>
+<div>
+    <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-2">Share</span>
+    <div class="flex gap-3">
+        <button onclick="shareFacebook()" class="w-9 h-9 rounded-full bg-[#1877f2] text-white flex items-center justify-center hover:scale-110 transition">
+            <i class="fa-brands fa-facebook-f"></i>
+        </button>
+        <button onclick="shareTwitter()" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center hover:scale-110 transition border border-neutral-700">
+            <i class="fa-brands fa-x-twitter"></i>
+        </button>
+        <button onclick="shareLine()" class="w-9 h-9 rounded-full bg-[#00c300] text-white flex items-center justify-center hover:scale-110 transition">
+            <i class="fa-brands fa-line"></i>
+        </button>
+        <button onclick="copyShareLink()" class="w-9 h-9 rounded-full bg-neutral-800 text-white flex items-center justify-center hover:bg-yellow-400 hover:text-black transition">
+            <i class="fa-solid fa-link"></i>
+        </button>
+    </div>
+</div>
+
                     </div>
 
                     <button onclick="copyMainPrompt()" class="w-full mt-6 bg-yellow-400 text-black py-4 rounded-lg font-bold uppercase tracking-widest hover:bg-yellow-300 transition shadow-[0_0_20px_rgba(250,204,21,0.2)] flex items-center justify-center gap-2">
@@ -226,6 +240,30 @@
     </div>
 
     <script type="module">
+const currentUrl = window.location.href;
+
+window.shareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, "_blank");
+};
+
+window.shareTwitter = () => {
+    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}`, "_blank");
+};
+
+window.shareLine = () => {
+    window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(currentUrl)}`, "_blank");
+};
+
+window.copyShareLink = () => {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+        const toast = document.getElementById("toast");
+        toast.querySelector("span").innerText = "Link Copied";
+        toast.classList.add("toast-active");
+        setTimeout(() => toast.classList.remove("toast-active"), 2500);
+    });
+};
+
+        
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
