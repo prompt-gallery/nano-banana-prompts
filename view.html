@@ -235,7 +235,7 @@
         <span class="uppercase tracking-wide text-xs">Prompt Copied</span>
     </div>
 
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -248,8 +248,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- 2. GLOBAL ACTIONS (Share / Copy) ---
-        // ประกาศไว้ที่ window object เพื่อให้ HTML เรียกใช้ได้
+        // --- 2. GLOBAL ACTIONS ---
         const currentUrl = window.location.href;
         
         window.shareFacebook = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, "_blank");
@@ -284,21 +283,25 @@
             const promptId = getParam("id");
             
             if (!promptId) {
-                // ถ้าไม่มี ID ให้กลับหน้าแรก
                 window.location.href = "index.html"; 
                 return;
             }
 
             try {
-                // Fetch Prompt Data
                 const docRef = doc(db, "prompts", promptId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const promptData = { id: docSnap.id, ...docSnap.data() };
+                    
+                    // 1. Render หน้าเว็บ (หัวข้อ, รูป, Text)
                     renderPage(promptData);
+                    
+                    // 2. Update SEO
                     updateSEO(promptData);
-                    loadRelated(promptData.id); // ส่ง ID ไปเพื่อกันไม่ให้แสดงซ้ำ
+                    
+                    // 3. โหลด Related (ทำงานต่อแน่นอน เพราะ renderPage ไม่ return ทิ้งกลางทางแล้ว)
+                    loadRelated(promptData.id); 
                 } else {
                     document.getElementById("loadingState").innerHTML = "<p class='text-red-500 font-mono'>PROMPT NOT FOUND (404)</p>";
                 }
@@ -320,91 +323,111 @@
             document.getElementById("loadingState").classList.add("hidden");
             document.getElementById("contentArea").classList.remove("hidden");
 
-            // Fill Text
+            // Fill Text Info
             document.getElementById("titleText").innerText = data.title || "Untitled";
             document.getElementById("categoryBadge").innerText = data.category || "General";
             document.getElementById("noteText").innerText = data.note || "No description provided.";
             document.getElementById("promptText").innerText = data.prompt || "No prompt available.";
             
-            // Format Date
             let dateStr = "-";
             if (data.created && data.created.seconds) {
                 dateStr = new Date(data.created.seconds * 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
             }
             document.getElementById("dateText").innerText = dateStr;
 
-            // --- Images Logic ---
+            // --- Images Logic (แก้ไขใหม่ ใช้ if/else) ---
             const previewImgs = normalizeArr(data.preview);
             const mainImgs = normalizeArr(data.images);
-            // รวมรูปและลบซ้ำ
             let allImages = [...new Set([...previewImgs, ...mainImgs])];
 
-if(allImages.length === 0) {
-    // TEXT ONLY MODE
-    const mainBox = document.getElementById("mainImage").parentElement;
-    mainBox.innerHTML = `
-        <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
-            <i class="fa-solid fa-bolt text-6xl text-neutral-800 group-hover:text-yellow-500/60 transition duration-500"></i>
-            <span class="text-xs font-mono text-neutral-700 mt-3 tracking-widest uppercase group-hover:text-neutral-500">
-                No Preview
-            </span>
-        </div>
-    `;
-    
-    // ล้าง thumbnail
-    document.getElementById("thumbContainer").innerHTML = `
-        <span class="text-[10px] text-neutral-600 font-mono self-center">
-            TEXT ONLY PROMPT
-        </span>
-    `;
-    
-    return; // จบ render image ตรงนี้เลย
-}
-
-
-            // Render Main
             const mainImg = document.getElementById("mainImage");
-            mainImg.src = allImages[0];
-            document.getElementById("downloadBtn").href = allImages[0];
-
-            // Render Thumbnails
             const thumbContainer = document.getElementById("thumbContainer");
-            thumbContainer.innerHTML = "";
-            
-            allImages.forEach((img, index) => {
-                const thumb = document.createElement("img");
-                thumb.src = img;
-                thumb.className = `w-16 h-16 object-cover rounded border border-neutral-800 cursor-pointer opacity-60 hover:opacity-100 transition flex-shrink-0 ${index === 0 ? 'thumb-active' : ''}`;
+            const downloadBtn = document.getElementById("downloadBtn");
+
+            // เช็คว่ามีรูปไหม?
+            if (allImages.length === 0) {
+                // --- กรณีไม่มีรูป (Text Only) ---
+                // แทนที่ <img> ด้วย Placeholder Icon
+                mainImg.parentElement.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
+                        <i class="fa-solid fa-bolt text-6xl text-neutral-800 group-hover:text-yellow-500/60 transition duration-500"></i>
+                        <span class="text-xs font-mono text-neutral-700 mt-3 tracking-widest uppercase group-hover:text-neutral-500">
+                            No Preview
+                        </span>
+                    </div>
+                `;
                 
-                thumb.onclick = () => {
-                    mainImg.src = img;
-                    document.getElementById("downloadBtn").href = img;
+                // แจ้งเตือนตรง Thumbnails
+                thumbContainer.innerHTML = `
+                    <span class="text-[10px] text-neutral-600 font-mono self-center border border-neutral-800 px-3 py-1 rounded-full">
+                        TEXT ONLY PROMPT
+                    </span>
+                `;
+
+                // ซ่อนปุ่ม Download
+                if(downloadBtn) downloadBtn.style.display = 'none';
+
+            } else {
+                // --- กรณีมีรูป (Normal Mode) ---
+                
+                // 1. Render รูปใหญ่
+                mainImg.src = allImages[0];
+                if(downloadBtn) {
+                    downloadBtn.href = allImages[0];
+                    downloadBtn.style.display = 'block';
+                }
+
+                // 2. Render Thumbnails
+                thumbContainer.innerHTML = "";
+                
+                allImages.forEach((img, index) => {
+                    const thumb = document.createElement("img");
+                    thumb.src = img;
+                    thumb.className = `w-16 h-16 object-cover rounded border border-neutral-800 cursor-pointer opacity-60 hover:opacity-100 transition flex-shrink-0 ${index === 0 ? 'thumb-active' : ''}`;
                     
-                    // Reset styling
-                    Array.from(thumbContainer.children).forEach(el => {
-                        el.classList.remove("thumb-active");
-                        el.style.opacity = "0.6";
-                        el.style.borderColor = "#262626";
-                    });
-                    
-                    // Active styling
-                    thumb.classList.add("thumb-active");
-                    thumb.style.opacity = "1";
-                    thumb.style.borderColor = "#FACC15";
-                };
-                thumbContainer.appendChild(thumb);
-            });
+                    thumb.onclick = () => {
+                        // เปลี่ยนรูปใหญ่
+                        mainImg.src = img;
+                        if(downloadBtn) downloadBtn.href = img;
+                        
+                        // Reset style ปุ่มเล็ก
+                        Array.from(thumbContainer.children).forEach(el => {
+                            el.classList.remove("thumb-active");
+                            el.style.opacity = "0.6";
+                            el.style.borderColor = "#262626";
+                        });
+                        
+                        // Active style ปุ่มที่กด
+                        thumb.classList.add("thumb-active");
+                        thumb.style.opacity = "1";
+                        thumb.style.borderColor = "#FACC15";
+                    };
+                    thumbContainer.appendChild(thumb);
+                });
+            }
+            
+            // จบฟังก์ชันโดยไม่ return ทิ้ง ทำให้ initPage ทำงานบรรทัดต่อไป (loadRelated) ได้ถูกต้อง
         }
 
         function updateSEO(data) {
             document.title = `${data.title} | Nano Banana Prompts`;
             const desc = data.note || `Get the AI prompt for "${data.title}"`;
-            document.querySelector('meta[name="description"]').setAttribute("content", desc);
-            document.querySelector('meta[property="og:title"]').setAttribute("content", data.title);
-            document.querySelector('meta[property="og:description"]').setAttribute("content", desc);
             
-            // Schema
-            const mainImgSrc = document.getElementById("mainImage").src;
+            // Update Meta Tags
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if(metaDesc) metaDesc.setAttribute("content", desc);
+            
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            if(ogTitle) ogTitle.setAttribute("content", data.title);
+            
+            const ogDesc = document.querySelector('meta[property="og:description"]');
+            if(ogDesc) ogDesc.setAttribute("content", desc);
+
+            // Update Schema
+            const mainImgEl = document.getElementById("mainImage");
+            // ถ้ามีรูปใช้ src ถ้าไม่มีใช้ placeholder
+            const mainImgSrc = mainImgEl ? mainImgEl.src : "https://via.placeholder.com/1200x630";
+            
             const schema = {
                 "@context": "https://schema.org",
                 "@type": "ImageObject",
@@ -418,7 +441,7 @@ if(allImages.length === 0) {
         async function loadRelated(currentId) {
             const grid = document.getElementById("relatedGrid");
             try {
-                // ดึงมา 8 รายการล่าสุด แล้วกรองตัวปัจจุบันออกใน JS
+                // ดึง 8 รายการล่าสุดมา (เผื่อตัดตัวปัจจุบันออก)
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(8));
                 const snap = await getDocs(q);
                 
@@ -429,35 +452,39 @@ if(allImages.length === 0) {
                     }
                 });
 
-                // ตัดเหลือ 4 อัน
+                // ตัดให้เหลือ 4 รายการ
                 related = related.slice(0, 4);
 
                 grid.innerHTML = "";
                 if (related.length === 0) {
-                    grid.innerHTML = `<div class="col-span-full text-center text-neutral-800 text-xs">No related prompts found.</div>`;
+                    grid.innerHTML = `<div class="col-span-full text-center text-neutral-800 text-xs font-mono mt-10">No related prompts found.</div>`;
                     return;
                 }
 
                 related.forEach(item => {
-                    // หา URL รูปแรก
-                    let img = "https://via.placeholder.com/400x300/111/333?text=NANO";
+                    // หารูปปก
+                    let img = "";
                     if (item.preview && item.preview[0]) img = item.preview[0];
                     else if (item.images && item.images[0]) img = item.images[0];
+                    
+                    // ถ้าไม่มีรูป ให้ใช้ Placeholder สีดำ
+                    const imgHTML = img 
+                        ? `<img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700">`
+                        : `<div class="w-full h-full bg-[#080808] flex items-center justify-center"><i class="fa-solid fa-bolt text-neutral-800 text-2xl group-hover:text-yellow-500 transition"></i></div>`;
 
                     const card = document.createElement("a");
-
                     card.href = `view.html?id=${item.id}`; 
-                    card.className = "card block rounded-lg overflow-hidden group";
+                    card.className = "block bg-[#090909] border border-neutral-900 rounded-lg overflow-hidden group hover:border-neutral-700 transition";
                     card.innerHTML = `
                         <div class="h-40 overflow-hidden bg-black relative">
-                            <img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-500">
-                             <div class="absolute top-2 left-2 bg-black/60 backdrop-blur text-yellow-400 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10">
+                            ${imgHTML}
+                             <div class="absolute top-2 left-2 bg-black/80 backdrop-blur text-yellow-400 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-yellow-500/20">
                                 ${item.category || "General"}
                             </div>
                         </div>
-                        <div class="p-4 bg-[#090909]">
+                        <div class="p-4">
                             <h4 class="text-white text-sm font-bold truncate group-hover:text-yellow-400 transition">${item.title || "Untitled"}</h4>
-                            <p class="text-neutral-500 text-[10px] mt-1 line-clamp-1">${item.note || ""}</p>
+                            <p class="text-neutral-500 text-[10px] mt-1 line-clamp-1 font-mono">${item.note || "No description"}</p>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -465,11 +492,11 @@ if(allImages.length === 0) {
 
             } catch (e) {
                 console.error("Related error", e);
-                grid.innerHTML = "";
+                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs">Failed to load suggestions</div>`;
             }
         }
 
-        // Run
+        // เริ่มต้นทำงาน
         initPage();
 
     </script>
