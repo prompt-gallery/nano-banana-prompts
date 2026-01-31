@@ -445,14 +445,27 @@ function updateSEO(data) {
 
         async function loadRelated(currentId) {
             const grid = document.getElementById("relatedGrid");
+            if (!grid) return;
+
             try {
-                // 1. ดึงข้อมูล 8 รายการล่าสุด
-                const q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(8));
-                const snap = await getDocs(q);
+                // 1. ดึงข้อมูล: ใช้ query แบบปลอดภัย
+                // หมายเหตุ: ถ้าข้อมูลใน DB ไม่มี field 'created' การใส่ orderBy จะทำให้ไม่เจอข้อมูลเลย
+                // ผมเลยใส่ try-catch ซ้อนเพื่อลองดึงแบบไม่เรียงลำดับดูถ้าแบบแรกพัง
+                let q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(10));
+                let snap;
+                
+                try {
+                    snap = await getDocs(q);
+                } catch (err) {
+                    console.warn("Sorting failed (missing 'created' field?), trying unsorted fetch...", err);
+                    // Fallback: ถ้าเรียงตามวันที่ไม่ได้ ให้ดึงมาเลย 8 ตัว
+                    const fallbackQ = query(collection(db, "prompts"), limit(10));
+                    snap = await getDocs(fallbackQ);
+                }
                 
                 let related = [];
                 snap.forEach(doc => {
-                    // ไม่เอาตัวปัจจุบัน
+                    // กรองตัวปัจจุบันออก
                     if (doc.id !== currentId) {
                         related.push({ id: doc.id, ...doc.data() });
                     }
@@ -461,38 +474,43 @@ function updateSEO(data) {
                 // ตัดให้เหลือ 4 รายการ
                 related = related.slice(0, 4);
 
-                // 2. เคลียร์ข้อความ Loading ออก
+                // 2. เคลียร์ Loading
                 grid.innerHTML = "";
 
-                // 3. ถ้าไม่มีข้อมูล
+                // 3. กรณีไม่มีข้อมูล
                 if (related.length === 0) {
-                    grid.innerHTML = `<div class="col-span-full text-center text-neutral-800 text-xs font-mono mt-10">No related prompts found.</div>`;
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-10 opacity-50">
+                            <i class="fa-regular fa-folder-open text-2xl mb-2"></i>
+                            <p class="text-xs font-mono">No other prompts found.</p>
+                        </div>`;
                     return;
                 }
 
                 // 4. วนลูปสร้าง Card
                 related.forEach(item => {
-                    // --- แก้ไข Logic การดึงรูป (รองรับทั้งชื่อเก่าและใหม่) ---
+                    const afterImgs = normalizeArr(item.after);
+                    const beforeImgs = normalizeArr(item.before);
                     
-                    // แปลงข้อมูลให้เป็น Array ให้หมดก่อน (ใช้ฟังก์ชัน normalizeArr ที่มีอยู่แล้ว)
-                    // ลำดับความสำคัญ: after -> preview -> before -> images
-                    const afterImgs = normalizeArr(item.after || item.preview);
-                    const beforeImgs = normalizeArr(item.before || item.images);
+                    // เลือกรูปที่จะโชว์
+                    let imgUrl = "";
+                    if (afterImgs.length > 0) imgUrl = afterImgs[0];
+                    else if (beforeImgs.length > 0) imgUrl = beforeImgs[0];
+
+                    // สร้าง HTML
+                    const card = document.createElement("a");
+                    card.href = `index.html?id=${item.id}`; // ลิงก์กลับไปหน้า index โดยส่ง id ไป (หรือเปลี่ยนเป็น view.html ตามโครงสร้างไฟล์คุณ)
                     
-                    let img = "";
-                    if (afterImgs.length > 0) img = afterImgs[0];      // ลองรูปผลลัพธ์ก่อน
-                    else if (beforeImgs.length > 0) img = beforeImgs[0]; // ถ้าไม่มีลองรูปต้นฉบับ
+                    // ถ้าไฟล์หน้านี้ชื่อ view.html ให้ใช้ card.href = `view.html?id=${item.id}`;
+                    // แต่ถ้าใช้หน้าเดียว (index.html) ให้ใช้ `?id=` เหมือนเดิม
+                    card.href = `?id=${item.id}`; 
+
+                    card.className = "block bg-[#090909] border border-neutral-900 rounded-xl overflow-hidden group hover:border-neutral-700 transition shadow-lg relative";
                     
-                    // ถ้ามีรูป ให้แสดงรูป / ถ้าไม่มี ให้แสดงไอคอนสายฟ้า
-                    const imgHTML = img 
-                        ? `<img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700" loading="lazy">`
+                    const imgHTML = imgUrl 
+                        ? `<img src="${imgUrl}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700" loading="lazy">`
                         : `<div class="w-full h-full bg-[#080808] flex items-center justify-center"><i class="fa-solid fa-bolt text-neutral-800 text-2xl group-hover:text-yellow-500 transition"></i></div>`;
 
-                    const card = document.createElement("a");
-                    // ลิงก์ไปยังหน้า view.html พร้อม ID
-                    card.href = `view.html?id=${item.id}`; 
-                    card.className = "block bg-[#090909] border border-neutral-900 rounded-lg overflow-hidden group hover:border-neutral-700 transition shadow-lg";
-                    
                     card.innerHTML = `
                         <div class="h-40 overflow-hidden bg-black relative">
                             ${imgHTML}
@@ -501,16 +519,20 @@ function updateSEO(data) {
                             </div>
                         </div>
                         <div class="p-4">
-                            <h4 class="text-white text-sm font-bold truncate group-hover:text-yellow-400 transition">${item.title || "Untitled"}</h4>
-                            <p class="text-neutral-500 text-[10px] mt-1 line-clamp-1 font-mono">${item.note || "No description"}</p>
+                            <h4 class="text-white text-sm font-bold truncate group-hover:text-yellow-400 transition">
+                                ${item.title || "Untitled"}
+                            </h4>
+                            <p class="text-neutral-500 text-[10px] mt-1 line-clamp-1 font-mono">
+                                ${item.note || "No description"}
+                            </p>
                         </div>
                     `;
                     grid.appendChild(card);
                 });
 
             } catch (e) {
-                console.error("Related error:", e); // ดู Error ใน Console (F12)
-                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs py-10">Failed to load suggestions</div>`;
+                console.error("Critical Error loading related:", e);
+                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs py-10 font-mono">Error: ${e.message}</div>`;
             }
         }
 
