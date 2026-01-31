@@ -60,22 +60,13 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-        /* Prompt Box */
-        .prompt-box {
-            font-family: 'JetBrains Mono', monospace;
-            background: #000;
-            border: 1px solid #222;
-            transition: border-color 0.2s;
-        }
-        .prompt-box:hover { border-color: #444; }
-
         /* Thumbnails */
         .thumb-active {
             border-color: var(--accent) !important;
             opacity: 1 !important;
         }
 
-        /* Card Styles for Related Section */
+        /* Card Styles */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -85,6 +76,15 @@
             transform: translateY(-4px);
             border-color: #444;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Animation Keyframes (เพิ่มส่วนนี้เพื่อให้ animate-fade-in ทำงาน) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
         }
 
         /* Toast Animation */
@@ -148,8 +148,7 @@
                         </a>
                     </div>
 
-                    <div id="thumbContainer" class="flex gap-3 overflow-x-auto pb-2">
-                        </div>
+                    <div id="thumbContainer" class="flex gap-3 overflow-x-auto pb-2 scrollbar-thin"></div>
                 </div>
 
                 <div class="lg:col-span-5 flex flex-col h-full">
@@ -169,12 +168,11 @@
                     <div class="bg-[#050505] border border-neutral-800 rounded-xl p-5 mb-6 shadow-inner relative group">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-[10px] text-neutral-500 font-mono uppercase tracking-widest">The Prompt</span>
-                            <button onclick="copyMainPrompt()" class="text-yellow-400 text-xs hover:text-white transition font-bold flex items-center gap-1">
+                            <button onclick="window.copyMainPrompt()" class="text-yellow-400 text-xs hover:text-white transition font-bold flex items-center gap-1">
                                 <i class="fa-regular fa-copy"></i> Copy
                             </button>
                         </div>
-                        <div id="promptText" class="font-mono text-sm text-neutral-300 leading-relaxed select-all break-words">
-                            </div>
+                        <div id="promptText" class="font-mono text-sm text-neutral-300 leading-relaxed select-all break-words"></div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mt-auto border-t border-neutral-900 pt-6">
@@ -182,28 +180,26 @@
                             <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-1">Model</span>
                             <span class="text-sm text-white font-mono">Nano Banana Pro</span>
                         </div>
-<div>
-    <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-2">Share</span>
-    <div class="flex gap-3">
-        <button onclick="shareFacebook()" class="w-9 h-9 rounded-full bg-[#1877f2] text-white flex items-center justify-center hover:scale-110 transition">
-            <i class="fa-brands fa-facebook-f"></i>
-        </button>
-        <button onclick="shareTwitter()" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center hover:scale-110 transition border border-neutral-700">
-            <i class="fa-brands fa-x-twitter"></i>
-        </button>
-        <button onclick="shareReddit()" class="w-9 h-9 rounded-full bg-[#ff4500] text-white flex items-center justify-center hover:scale-110 transition">
-            <i class="fa-brands fa-reddit-alien"></i>
-        </button>
-        <button onclick="copyShareLink()" class="w-9 h-9 rounded-full bg-neutral-800 text-white flex items-center justify-center hover:bg-yellow-400 hover:text-black transition">
-            <i class="fa-solid fa-link"></i>
-        </button>
-    </div>
-</div>
-
-
+                        <div>
+                            <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-2">Share</span>
+                            <div class="flex gap-3">
+                                <button onclick="window.shareFacebook()" class="w-9 h-9 rounded-full bg-[#1877f2] text-white flex items-center justify-center hover:scale-110 transition">
+                                    <i class="fa-brands fa-facebook-f"></i>
+                                </button>
+                                <button onclick="window.shareTwitter()" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center hover:scale-110 transition border border-neutral-700">
+                                    <i class="fa-brands fa-x-twitter"></i>
+                                </button>
+                                <button onclick="window.shareReddit()" class="w-9 h-9 rounded-full bg-[#ff4500] text-white flex items-center justify-center hover:scale-110 transition">
+                                    <i class="fa-brands fa-reddit-alien"></i>
+                                </button>
+                                <button onclick="window.copyShareLink()" class="w-9 h-9 rounded-full bg-neutral-800 text-white flex items-center justify-center hover:bg-yellow-400 hover:text-black transition">
+                                    <i class="fa-solid fa-link"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <button onclick="copyMainPrompt()" class="w-full mt-6 bg-yellow-400 text-black py-4 rounded-lg font-bold uppercase tracking-widest hover:bg-yellow-300 transition shadow-[0_0_20px_rgba(250,204,21,0.2)] flex items-center justify-center gap-2">
+                    <button onclick="window.copyMainPrompt()" class="w-full mt-6 bg-yellow-400 text-black py-4 rounded-lg font-bold uppercase tracking-widest hover:bg-yellow-300 transition shadow-[0_0_20px_rgba(250,204,21,0.2)] flex items-center justify-center gap-2">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Copy Prompt
                     </button>
 
@@ -221,7 +217,6 @@
             </div>
 
         </div>
-
     </main>
 
     <footer class="border-t border-neutral-900 bg-[#050505] py-12 text-center mt-auto">
@@ -241,35 +236,10 @@
     </div>
 
     <script type="module">
-const currentUrl = window.location.href;
-const shareText = document.title;
-
-window.shareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, "_blank");
-};
-
-window.shareTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`, "_blank");
-};
-
-window.shareReddit = () => {
-    window.open(`https://www.reddit.com/submit?title=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`, "_blank");
-};
-
-window.copyShareLink = () => {
-    navigator.clipboard.writeText(currentUrl).then(() => {
-        const toast = document.getElementById("toast");
-        toast.querySelector("span").innerText = "Link Copied";
-        toast.classList.add("toast-active");
-        setTimeout(() => toast.classList.remove("toast-active"), 2500);
-    });
-};
-
-        
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- Config (Must match index.html) ---
+        // --- 1. CONFIGURATION ---
         const firebaseConfig = {
              apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
              projectId: "prompt-gallery-64aa9"
@@ -278,38 +248,63 @@ window.copyShareLink = () => {
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- Utils ---
+        // --- 2. GLOBAL ACTIONS (Share / Copy) ---
+        // ประกาศไว้ที่ window object เพื่อให้ HTML เรียกใช้ได้
+        const currentUrl = window.location.href;
+        
+        window.shareFacebook = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, "_blank");
+        window.shareTwitter = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(currentUrl)}`, "_blank");
+        window.shareReddit = () => window.open(`https://www.reddit.com/submit?title=${encodeURIComponent(document.title)}&url=${encodeURIComponent(currentUrl)}`, "_blank");
+        
+        window.copyShareLink = () => {
+            navigator.clipboard.writeText(currentUrl).then(() => showToast("Link Copied"));
+        };
+
+        window.copyMainPrompt = () => {
+            const text = document.getElementById("promptText").innerText;
+            if(!text) return;
+            navigator.clipboard.writeText(text).then(() => showToast("Prompt Copied"));
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.querySelector("span").innerText = msg;
+            toast.classList.add("toast-active");
+            setTimeout(() => toast.classList.remove("toast-active"), 2500);
+        }
+
+        // --- 3. PAGE LOGIC ---
+        
         function getParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
         }
 
-        // --- Main Logic ---
-        const promptId = getParam("id");
-        let promptData = null;
-
         async function initPage() {
+            const promptId = getParam("id");
+            
             if (!promptId) {
-                window.location.href = "index.html";
+                // ถ้าไม่มี ID ให้กลับหน้าแรก
+                window.location.href = "index.html"; 
                 return;
             }
 
             try {
-                // 1. Fetch Current Doc
+                // Fetch Prompt Data
                 const docRef = doc(db, "prompts", promptId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    promptData = { id: docSnap.id, ...docSnap.data() };
+                    const promptData = { id: docSnap.id, ...docSnap.data() };
                     renderPage(promptData);
                     updateSEO(promptData);
-                    loadRelated(promptData.category);
+                    loadRelated(promptData.id); // ส่ง ID ไปเพื่อกันไม่ให้แสดงซ้ำ
                 } else {
-                    document.getElementById("loadingState").innerHTML = "<p class='text-red-500'>Prompt not found.</p>";
+                    document.getElementById("loadingState").innerHTML = "<p class='text-red-500 font-mono'>PROMPT NOT FOUND (404)</p>";
                 }
             } catch (error) {
                 console.error(error);
-                document.getElementById("loadingState").innerHTML = "<p class='text-red-500'>Error loading data.</p>";
+                document.getElementById("loadingState").innerHTML = "<p class='text-red-500 font-mono'>ERROR LOADING DATA</p>";
             }
         }
 
@@ -321,127 +316,101 @@ window.copyShareLink = () => {
         }
 
         function renderPage(data) {
-            // Unhide content
+            // Hide Loading / Show Content
             document.getElementById("loadingState").classList.add("hidden");
             document.getElementById("contentArea").classList.remove("hidden");
 
-            // Text Data
+            // Fill Text
             document.getElementById("titleText").innerText = data.title || "Untitled";
             document.getElementById("categoryBadge").innerText = data.category || "General";
             document.getElementById("noteText").innerText = data.note || "No description provided.";
             document.getElementById("promptText").innerText = data.prompt || "No prompt available.";
             
-            // Date formatting
-            let dateStr = "Unknown Date";
+            // Format Date
+            let dateStr = "-";
             if (data.created && data.created.seconds) {
                 dateStr = new Date(data.created.seconds * 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
-            } else if (typeof data.created === 'string') {
-                dateStr = data.created;
             }
             document.getElementById("dateText").innerText = dateStr;
 
-            // --- IMAGE LOGIC (แก้ใหม่: รวมรูปทั้งหมด) ---
-            
-            // 1. ดึงรูปจากทั้ง Preview และ Images
+            // --- Images Logic ---
             const previewImgs = normalizeArr(data.preview);
             const mainImgs = normalizeArr(data.images);
+            // รวมรูปและลบซ้ำ
+            let allImages = [...new Set([...previewImgs, ...mainImgs])];
 
-            // 2. นำมารวมกัน (Preview ขึ้นก่อน)
-            let allImages = [...previewImgs, ...mainImgs];
+            if(allImages.length === 0) allImages = ["https://via.placeholder.com/800x600/111/333?text=NO+IMAGE"];
 
-            // 3. (Optional) ลบรูปซ้ำออก (เผื่อใส่ URL เดียวกันมาทั้ง 2 ช่อง)
-            allImages = [...new Set(allImages)];
-
-            // 4. กรณีไม่มีรูปเลย (Fallback)
-            if(allImages.length === 0) {
-                // ใช้รูป Placeholder สีดำเทา ดูดีกว่าขาวล้วน
-                allImages = ["https://via.placeholder.com/800x600/111/333?text=NO+IMAGE+AVAILABLE"];
-            }
-
-            // --- RENDER IMAGES ---
-
-            // Render Main Image (รูปแรกสุด)
+            // Render Main
             const mainImg = document.getElementById("mainImage");
             mainImg.src = allImages[0];
             document.getElementById("downloadBtn").href = allImages[0];
 
-            // Render Thumbnails Loop
+            // Render Thumbnails
             const thumbContainer = document.getElementById("thumbContainer");
             thumbContainer.innerHTML = "";
             
             allImages.forEach((img, index) => {
                 const thumb = document.createElement("img");
                 thumb.src = img;
-                // Style: ถ้าเป็นรูปที่กำลังโชว์อยู่ ให้มีขอบเหลือง
                 thumb.className = `w-16 h-16 object-cover rounded border border-neutral-800 cursor-pointer opacity-60 hover:opacity-100 transition flex-shrink-0 ${index === 0 ? 'thumb-active' : ''}`;
                 
                 thumb.onclick = () => {
-                    // Swap logic
                     mainImg.src = img;
                     document.getElementById("downloadBtn").href = img;
                     
-                    // Reset styling thumbnails
+                    // Reset styling
                     Array.from(thumbContainer.children).forEach(el => {
                         el.classList.remove("thumb-active");
                         el.style.opacity = "0.6";
-                        el.style.borderColor = "#262626"; // neutral-800
+                        el.style.borderColor = "#262626";
                     });
                     
                     // Active styling
                     thumb.classList.add("thumb-active");
                     thumb.style.opacity = "1";
-                    thumb.style.borderColor = "#FACC15"; // yellow-400
+                    thumb.style.borderColor = "#FACC15";
                 };
                 thumbContainer.appendChild(thumb);
             });
         }
 
-        // --- SEO & Meta Injection ---
         function updateSEO(data) {
             document.title = `${data.title} | Nano Banana Prompts`;
-            
-            // Meta Description
-            const desc = data.note || `Get the AI prompt for "${data.title}" at Nano Banana Prompts.`;
+            const desc = data.note || `Get the AI prompt for "${data.title}"`;
             document.querySelector('meta[name="description"]').setAttribute("content", desc);
-
-            // Open Graph
             document.querySelector('meta[property="og:title"]').setAttribute("content", data.title);
             document.querySelector('meta[property="og:description"]').setAttribute("content", desc);
             
-            // Schema.org
+            // Schema
+            const mainImgSrc = document.getElementById("mainImage").src;
             const schema = {
                 "@context": "https://schema.org",
                 "@type": "ImageObject",
                 "name": data.title,
                 "description": desc,
-                "author": "Nano Banana Prompts",
-                "contentUrl": document.getElementById("mainImage").src,
-                "datePublished": new Date().toISOString()
+                "contentUrl": mainImgSrc
             };
             document.getElementById("json-ld").textContent = JSON.stringify(schema);
         }
 
-        // --- Related Prompts Logic ---
-        async function loadRelated(category) {
+        async function loadRelated(currentId) {
             const grid = document.getElementById("relatedGrid");
             try {
-                // Query: Same category, limited to 5 (to filter out self later)
-                // Note: For perfect randomness or specific exclusion, logic gets complex in Firestore.
-                // We will simple fetch latest 5 and filter out current ID in JS.
+                // ดึงมา 8 รายการล่าสุด แล้วกรองตัวปัจจุบันออกใน JS
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(8));
                 const snap = await getDocs(q);
                 
                 let related = [];
                 snap.forEach(doc => {
-                    if (doc.id !== promptId) { // Exclude current
+                    if (doc.id !== currentId) {
                         related.push({ id: doc.id, ...doc.data() });
                     }
                 });
 
-                // Slice to 4 items
+                // ตัดเหลือ 4 อัน
                 related = related.slice(0, 4);
 
-                // Render
                 grid.innerHTML = "";
                 if (related.length === 0) {
                     grid.innerHTML = `<div class="col-span-full text-center text-neutral-800 text-xs">No related prompts found.</div>`;
@@ -449,13 +418,14 @@ window.copyShareLink = () => {
                 }
 
                 related.forEach(item => {
-                    // Image fallback
-                    let img = "https://via.placeholder.com/400x300";
+                    // หา URL รูปแรก
+                    let img = "https://via.placeholder.com/400x300/111/333?text=NANO";
                     if (item.preview && item.preview[0]) img = item.preview[0];
                     else if (item.images && item.images[0]) img = item.images[0];
 
                     const card = document.createElement("a");
-                    card.href = `view.html?id=${item.id}`;
+
+                    card.href = `view.html?id=${item.id}`; 
                     card.className = "card block rounded-lg overflow-hidden group";
                     card.innerHTML = `
                         <div class="h-40 overflow-hidden bg-black relative">
@@ -478,19 +448,9 @@ window.copyShareLink = () => {
             }
         }
 
-        // --- Copy Actions ---
-        window.copyMainPrompt = () => {
-            const text = document.getElementById("promptText").innerText;
-            if(!text) return;
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById("toast");
-                toast.classList.add("toast-active");
-                setTimeout(() => toast.classList.remove("toast-active"), 2500);
-            });
-        };
-
-        // Start
+        // Run
         initPage();
+
     </script>
 </body>
 </html>
