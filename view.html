@@ -339,7 +339,28 @@
             // รวมรูปและลบซ้ำ
             let allImages = [...new Set([...previewImgs, ...mainImgs])];
 
-            if(allImages.length === 0) allImages = ["https://via.placeholder.com/800x600/111/333?text=NO+IMAGE"];
+if(allImages.length === 0) {
+    // TEXT ONLY MODE
+    const mainBox = document.getElementById("mainImage").parentElement;
+    mainBox.innerHTML = `
+        <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
+            <i class="fa-solid fa-bolt text-6xl text-neutral-800 group-hover:text-yellow-500/60 transition duration-500"></i>
+            <span class="text-xs font-mono text-neutral-700 mt-3 tracking-widest uppercase group-hover:text-neutral-500">
+                No Preview
+            </span>
+        </div>
+    `;
+    
+    // ล้าง thumbnail
+    document.getElementById("thumbContainer").innerHTML = `
+        <span class="text-[10px] text-neutral-600 font-mono self-center">
+            TEXT ONLY PROMPT
+        </span>
+    `;
+    
+    return; // จบ render image ตรงนี้เลย
+}
+
 
             // Render Main
             const mainImg = document.getElementById("mainImage");
