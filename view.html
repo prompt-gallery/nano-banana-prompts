@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Loading Prompt... | Nano Banana Prompts</title>
+    <meta name="description" content="View detailed AI prompt and image preview.">
+    
+    <meta property="og:title" content="Nano Banana Prompts">
+    <meta property="og:description" content="Discover high-quality AI prompts.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630">
+    <meta property="og:type" content="article">
+
+    <script type="application/ld+json" id="json-ld">
+    {
+      "@context": "https://schema.org",
+      "@type": "ImageObject",
+      "name": "Nano Banana Prompt",
+      "description": "AI Generated Art Prompt",
+      "contentUrl": ""
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-body: #020202;
+            --bg-card: #090909;
+            --border-color: #1a1a1a;
+            --accent: #FACC15;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: #f1f1f1;
+            /* Grid Pattern */
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 0%, var(--bg-body) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* Prompt Box */
+        .prompt-box {
+            font-family: 'JetBrains Mono', monospace;
+            background: #000;
+            border: 1px solid #222;
+            transition: border-color 0.2s;
+        }
+        .prompt-box:hover { border-color: #444; }
+
+        /* Thumbnails */
+        .thumb-active {
+            border-color: var(--accent) !important;
+            opacity: 1 !important;
+        }
+
+        /* Card Styles for Related Section */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #444;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Toast Animation */
+        @keyframes slideUpFade {
+            from { transform: translate(-50%, 20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .toast-active {
+            display: flex !important;
+            animation: slideUpFade 0.3s forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <div class="bg-overlay"></div>
+
+    <header class="border-b border-neutral-900 bg-black/90 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 select-none group">
+                <div class="w-10 h-10 bg-yellow-400 rounded flex items-center justify-center text-black text-xl shadow-[0_0_20px_rgba(250,204,21,0.2)] group-hover:scale-105 transition">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div class="leading-tight">
+                    <h1 class="text-xl font-black text-white tracking-tighter uppercase">
+                        NANO<span class="text-yellow-400">BANANA</span>
+                    </h1>
+                    <span class="text-[10px] text-neutral-500 font-mono tracking-[0.3em] uppercase block">
+                        Gallery v2.0
+                    </span>
+                </div>
+            </a>
+
+            <a href="index.html" class="text-xs font-bold text-neutral-400 hover:text-yellow-400 transition flex items-center gap-2 uppercase tracking-wider border border-neutral-800 px-4 py-2 rounded-full hover:border-yellow-400">
+                <i class="fa-solid fa-arrow-left"></i> Back to Gallery
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-[1200px] mx-auto px-6 py-10 w-full z-10">
+        
+        <div id="loadingState" class="text-center py-40">
+            <i class="fa-solid fa-circle-notch fa-spin text-5xl text-neutral-800 mb-4"></i>
+            <p class="text-neutral-600 font-mono text-xs tracking-[0.3em] uppercase">Loading Details...</p>
+        </div>
+
+        <div id="contentArea" class="hidden animate-fade-in">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-20">
+                
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="relative w-full aspect-square md:aspect-[4/3] bg-black rounded-xl overflow-hidden border border-neutral-800 group shadow-2xl">
+                        <img id="mainImage" src="" alt="Prompt Preview" class="w-full h-full object-contain">
+                        <div class="absolute top-4 left-4">
+                            <span id="categoryBadge" class="bg-yellow-400 text-black text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded shadow-lg">
+                                Category
+                            </span>
+                        </div>
+                        <a id="downloadBtn" href="#" target="_blank" class="absolute top-4 right-4 bg-black/60 backdrop-blur text-white p-2 rounded hover:bg-white hover:text-black transition border border-white/10" title="Open Full Size">
+                            <i class="fa-solid fa-expand"></i>
+                        </a>
+                    </div>
+
+                    <div id="thumbContainer" class="flex gap-3 overflow-x-auto pb-2">
+                        </div>
+                </div>
+
+                <div class="lg:col-span-5 flex flex-col h-full">
+                    
+                    <div class="mb-6">
+                        <div class="text-neutral-500 text-xs font-mono mb-2 flex items-center gap-2">
+                            <i class="fa-regular fa-clock"></i> <span id="dateText">...</span>
+                        </div>
+                        <h1 id="titleText" class="text-3xl md:text-4xl font-black text-white leading-tight mb-4">
+                            Prompt Title
+                        </h1>
+                        <p id="noteText" class="text-neutral-400 text-sm leading-relaxed border-l-2 border-yellow-400 pl-4">
+                            Description goes here...
+                        </p>
+                    </div>
+
+                    <div class="bg-[#050505] border border-neutral-800 rounded-xl p-5 mb-6 shadow-inner relative group">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] text-neutral-500 font-mono uppercase tracking-widest">The Prompt</span>
+                            <button onclick="copyMainPrompt()" class="text-yellow-400 text-xs hover:text-white transition font-bold flex items-center gap-1">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <div id="promptText" class="font-mono text-sm text-neutral-300 leading-relaxed select-all break-words">
+                            </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-auto border-t border-neutral-900 pt-6">
+                        <div>
+                            <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-1">Model</span>
+                            <span class="text-sm text-white font-mono">Midjourney / SD</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-neutral-600 font-bold uppercase tracking-widest mb-1">Aspect Ratio</span>
+                            <span class="text-sm text-white font-mono">Default</span>
+                        </div>
+                    </div>
+
+                    <button onclick="copyMainPrompt()" class="w-full mt-6 bg-yellow-400 text-black py-4 rounded-lg font-bold uppercase tracking-widest hover:bg-yellow-300 transition shadow-[0_0_20px_rgba(250,204,21,0.2)] flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Copy Prompt
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="border-t border-neutral-900 pt-12">
+                <h3 class="text-xl font-bold text-white mb-8 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-yellow-400"></i> You might also like
+                </h3>
+                
+                <div id="relatedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="col-span-full text-center py-10 text-neutral-600 text-sm font-mono">Loading suggestions...</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="border-t border-neutral-900 bg-[#050505] py-12 text-center mt-auto">
+        <div class="max-w-7xl mx-auto px-6">
+            <p class="text-neutral-600 text-xs font-mono uppercase tracking-[0.2em] mb-2">
+                &copy; 2026 Nano Banana Prompts
+            </p>
+            <p class="text-neutral-800 text-[10px]">
+                Made for Creators
+            </p>
+        </div>
+    </footer>
+
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-6 py-3 rounded font-bold shadow-[0_0_30px_rgba(250,204,21,0.4)] hidden items-center gap-3 z-50">
+        <i class="fa-solid fa-check text-lg"></i>
+        <span class="uppercase tracking-wide text-xs">Prompt Copied</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- Config (Must match index.html) ---
+        const firebaseConfig = {
+             apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
+             projectId: "prompt-gallery-64aa9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Utils ---
+        function getParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // --- Main Logic ---
+        const promptId = getParam("id");
+        let promptData = null;
+
+        async function initPage() {
+            if (!promptId) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                // 1. Fetch Current Doc
+                const docRef = doc(db, "prompts", promptId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    promptData = { id: docSnap.id, ...docSnap.data() };
+                    renderPage(promptData);
+                    updateSEO(promptData);
+                    loadRelated(promptData.category);
+                } else {
+                    document.getElementById("loadingState").innerHTML = "<p class='text-red-500'>Prompt not found.</p>";
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById("loadingState").innerHTML = "<p class='text-red-500'>Error loading data.</p>";
+            }
+        }
+
+        function renderPage(data) {
+            // Unhide content
+            document.getElementById("loadingState").classList.add("hidden");
+            document.getElementById("contentArea").classList.remove("hidden");
+
+            // Text Data
+            document.getElementById("titleText").innerText = data.title || "Untitled";
+            document.getElementById("categoryBadge").innerText = data.category || "General";
+            document.getElementById("noteText").innerText = data.note || "No description provided.";
+            document.getElementById("promptText").innerText = data.prompt || "No prompt available.";
+            
+            // Date formatting
+            let dateStr = "Unknown Date";
+            if (data.created && data.created.seconds) {
+                dateStr = new Date(data.created.seconds * 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+            } else if (typeof data.created === 'string') {
+                dateStr = data.created;
+            }
+            document.getElementById("dateText").innerText = dateStr;
+
+            // Image Logic
+            let images = [];
+            if (Array.isArray(data.preview) && data.preview.length > 0) images = data.preview;
+            else if (Array.isArray(data.images) && data.images.length > 0) images = data.images;
+            else if (typeof data.preview === 'string') images = [data.preview];
+            
+            if(images.length === 0) images = ["https://via.placeholder.com/800x600/111/333?text=NO+IMAGE"];
+
+            // Render Main Image
+            const mainImg = document.getElementById("mainImage");
+            mainImg.src = images[0];
+            document.getElementById("downloadBtn").href = images[0];
+
+            // Render Thumbnails
+            const thumbContainer = document.getElementById("thumbContainer");
+            thumbContainer.innerHTML = "";
+            
+            images.forEach((img, index) => {
+                const thumb = document.createElement("img");
+                thumb.src = img;
+                thumb.className = `w-16 h-16 object-cover rounded border border-neutral-800 cursor-pointer opacity-60 hover:opacity-100 transition ${index === 0 ? 'thumb-active' : ''}`;
+                thumb.onclick = () => {
+                    // Swap logic
+                    mainImg.src = img;
+                    document.getElementById("downloadBtn").href = img;
+                    // Reset styling
+                    document.querySelectorAll("#thumbContainer img").forEach(el => {
+                        el.classList.remove("thumb-active");
+                        el.classList.remove("border-yellow-400");
+                    });
+                    thumb.classList.add("thumb-active");
+                };
+                thumbContainer.appendChild(thumb);
+            });
+        }
+
+        // --- SEO & Meta Injection ---
+        function updateSEO(data) {
+            document.title = `${data.title} | Nano Banana Prompts`;
+            
+            // Meta Description
+            const desc = data.note || `Get the AI prompt for "${data.title}" at Nano Banana Prompts.`;
+            document.querySelector('meta[name="description"]').setAttribute("content", desc);
+
+            // Open Graph
+            document.querySelector('meta[property="og:title"]').setAttribute("content", data.title);
+            document.querySelector('meta[property="og:description"]').setAttribute("content", desc);
+            
+            // Schema.org
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "ImageObject",
+                "name": data.title,
+                "description": desc,
+                "author": "Nano Banana Prompts",
+                "contentUrl": document.getElementById("mainImage").src,
+                "datePublished": new Date().toISOString()
+            };
+            document.getElementById("json-ld").textContent = JSON.stringify(schema);
+        }
+
+        // --- Related Prompts Logic ---
+        async function loadRelated(category) {
+            const grid = document.getElementById("relatedGrid");
+            try {
+                // Query: Same category, limited to 5 (to filter out self later)
+                // Note: For perfect randomness or specific exclusion, logic gets complex in Firestore.
+                // We will simple fetch latest 5 and filter out current ID in JS.
+                const q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(8));
+                const snap = await getDocs(q);
+                
+                let related = [];
+                snap.forEach(doc => {
+                    if (doc.id !== promptId) { // Exclude current
+                        related.push({ id: doc.id, ...doc.data() });
+                    }
+                });
+
+                // Slice to 4 items
+                related = related.slice(0, 4);
+
+                // Render
+                grid.innerHTML = "";
+                if (related.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center text-neutral-800 text-xs">No related prompts found.</div>`;
+                    return;
+                }
+
+                related.forEach(item => {
+                    // Image fallback
+                    let img = "https://via.placeholder.com/400x300";
+                    if (item.preview && item.preview[0]) img = item.preview[0];
+                    else if (item.images && item.images[0]) img = item.images[0];
+
+                    const card = document.createElement("a");
+                    card.href = `view.html?id=${item.id}`;
+                    card.className = "card block rounded-lg overflow-hidden group";
+                    card.innerHTML = `
+                        <div class="h-40 overflow-hidden bg-black relative">
+                            <img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-500">
+                             <div class="absolute top-2 left-2 bg-black/60 backdrop-blur text-yellow-400 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-white/10">
+                                ${item.category || "General"}
+                            </div>
+                        </div>
+                        <div class="p-4 bg-[#090909]">
+                            <h4 class="text-white text-sm font-bold truncate group-hover:text-yellow-400 transition">${item.title || "Untitled"}</h4>
+                            <p class="text-neutral-500 text-[10px] mt-1 line-clamp-1">${item.note || ""}</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (e) {
+                console.error("Related error", e);
+                grid.innerHTML = "";
+            }
+        }
+
+        // --- Copy Actions ---
+        window.copyMainPrompt = () => {
+            const text = document.getElementById("promptText").innerText;
+            if(!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.classList.add("toast-active");
+                setTimeout(() => toast.classList.remove("toast-active"), 2500);
+            });
+        };
+
+        // Start
+        initPage();
+    </script>
+</body>
+</html>
