@@ -45,7 +45,6 @@
             --bg-card: #090909;
             --border-color: #1a1a1a;
             --accent: #FACC15;
-            --accent-dim: #CA8A04;
         }
 
         body { 
@@ -55,15 +54,12 @@
             background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
             linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
             background-size: 40px 40px;
-            background-position: center top;
         }
 
         .bg-overlay {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: radial-gradient(circle at center, transparent 0%, var(--bg-body) 90%);
-            pointer-events: none;
-            z-index: -1;
+            pointer-events: none; z-index: -1;
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -75,8 +71,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
         }
         
         .card:hover {
@@ -85,43 +80,19 @@
             box-shadow: 0 20px 40px -15px rgba(0,0,0,0.8);
         }
 
-        .card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--accent);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
-        }
+        .prompt-code { font-family: 'JetBrains Mono', monospace; background: #000; border: 1px solid #222; }
 
-        .card:hover::after { transform: scaleX(1); }
-
-        .card-img-container { overflow: hidden; }
-        .card-img-container img.main-img { transition: transform 0.5s ease; }
-        .card:hover .card-img-container img.main-img { transform: scale(1.05); }
-
-        .prompt-code {
-            font-family: 'JetBrains Mono', monospace;
-            background: #000;
-            border: 1px solid #222;
-        }
-
-        .thumb-scroll::-webkit-scrollbar { height: 4px; }
-        .thumb-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-        .thumb-scroll { scrollbar-width: thin; scrollbar-color: #333 transparent; }
-
+        /* Animation */
         @keyframes slideUpFade {
             from { transform: translate(-50%, 20px); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
         }
-        .toast-active {
-            display: flex !important;
-            animation: slideUpFade 0.3s forwards;
-        }
+        .toast-active { display: flex !important; animation: slideUpFade 0.3s forwards; }
+
+        /* Lightbox Styles */
+        #lightbox { transition: opacity 0.3s ease; }
+        #lightbox.hidden { opacity: 0; pointer-events: none; }
+        #lightbox:not(.hidden) { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 
@@ -144,17 +115,15 @@
                     </span>
                 </div>
             </div>
-
             <div class="relative w-full md:w-96 group">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-600 group-focus-within:text-yellow-400 transition"></i>
-                <input type="text" id="searchInput" placeholder="Search style, model, or keyword..." 
-                       class="w-full bg-[#0a0a0a] border border-neutral-800 text-neutral-200 text-sm rounded-full py-3 pl-11 pr-5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition placeholder-neutral-700">
+                <input type="text" id="searchInput" placeholder="Search..." 
+                       class="w-full bg-[#0a0a0a] border border-neutral-800 text-neutral-200 text-sm rounded-full py-3 pl-11 pr-5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition">
             </div>
         </div>
     </header>
 
     <main class="flex-1 max-w-[1400px] mx-auto px-4 md:px-6 py-10 w-full z-10">
-        
         <div class="flex flex-col lg:flex-row justify-between items-center mb-10 gap-6">
             <div class="flex flex-wrap gap-2 justify-center lg:justify-start" id="tabContainer">
                 <button class="tab-btn active bg-yellow-400 text-black px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:bg-yellow-300" data-cat="All">All Prompts</button>
@@ -163,10 +132,9 @@
                 <button class="tab-btn bg-black border border-neutral-800 text-neutral-400 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:border-yellow-400 hover:text-white" data-cat="Landscape">Landscape</button>
                 <button class="tab-btn bg-black border border-neutral-800 text-neutral-400 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:border-yellow-400 hover:text-white" data-cat="E-commerce">E-commerce</button>
             </div>
-
             <div class="flex items-center gap-3 text-xs text-neutral-500 font-mono border-l border-neutral-800 pl-6 h-8">
                 <span>VIEW:</span>
-                <select id="itemsPerPage" class="bg-black border border-neutral-800 text-white rounded px-3 py-1 focus:outline-none focus:border-yellow-400 cursor-pointer hover:border-neutral-600 transition">
+                <select id="itemsPerPage" class="bg-black border border-neutral-800 text-white rounded px-3 py-1 focus:outline-none focus:border-yellow-400 cursor-pointer">
                     <option value="30" selected>30</option>
                     <option value="60">60</option>
                     <option value="100">100</option>
@@ -175,44 +143,29 @@
         </div>
 
         <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-            <div class="col-span-full text-center py-40">
-                <div class="inline-block relative">
-                    <i class="fa-solid fa-circle-notch fa-spin text-5xl text-neutral-800"></i>
-                    <i class="fa-solid fa-bolt text-xl text-yellow-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
-                </div>
-                <p class="text-neutral-600 font-mono text-xs tracking-[0.3em] mt-4 uppercase">Initializing System...</p>
             </div>
-        </div>
 
         <div id="paginationControls" class="mt-16 flex justify-center items-center gap-6 hidden">
-            <button id="prevBtn" class="w-10 h-10 flex items-center justify-center bg-black border border-neutral-800 text-white rounded-full hover:border-yellow-400 hover:text-yellow-400 transition disabled:opacity-30 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
+            <button id="prevBtn" class="w-10 h-10 flex items-center justify-center bg-black border border-neutral-800 text-white rounded-full hover:border-yellow-400 transition disabled:opacity-30"><i class="fa-solid fa-chevron-left"></i></button>
             <span id="pageInfo" class="text-neutral-500 text-xs font-mono tracking-widest">PAGE 1 / 1</span>
-            <button id="nextBtn" class="w-10 h-10 flex items-center justify-center bg-black border border-neutral-800 text-white rounded-full hover:border-yellow-400 hover:text-yellow-400 transition disabled:opacity-30 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
+            <button id="nextBtn" class="w-10 h-10 flex items-center justify-center bg-black border border-neutral-800 text-white rounded-full hover:border-yellow-400 transition disabled:opacity-30"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
-
     </main>
 
     <footer class="border-t border-neutral-900 bg-[#050505] py-12 text-center z-10 mt-10">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="w-8 h-8 bg-neutral-900 rounded flex items-center justify-center text-neutral-600 mx-auto mb-4">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-            <p class="text-neutral-600 text-xs font-mono uppercase tracking-[0.2em] mb-2">
-                &copy; 2026 Nano Banana Prompts
-            </p>
-            <p class="text-neutral-800 text-[10px]">
-                Made for Creators
-            </p>
+            <div class="w-8 h-8 bg-neutral-900 rounded flex items-center justify-center text-neutral-600 mx-auto mb-4"><i class="fa-solid fa-bolt"></i></div>
+            <p class="text-neutral-600 text-xs font-mono uppercase tracking-[0.2em] mb-2">&copy; 2026 Nano Banana Prompts</p>
         </div>
     </footer>
 
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-6 py-3 rounded font-bold shadow-[0_0_30px_rgba(250,204,21,0.4)] hidden items-center gap-3 z-50">
-        <i class="fa-solid fa-check text-lg"></i>
-        <span class="uppercase tracking-wide text-xs">Prompt Copied</span>
+        <i class="fa-solid fa-check text-lg"></i><span class="uppercase tracking-wide text-xs">Prompt Copied</span>
+    </div>
+
+    <div id="lightbox" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center p-4">
+        <button onclick="document.getElementById('lightbox').classList.add('hidden')" class="absolute top-5 right-5 text-white text-3xl hover:text-yellow-400"><i class="fa-solid fa-times"></i></button>
+        <img id="lightboxImg" src="" class="max-w-full max-h-[90vh] object-contain rounded shadow-[0_0_50px_rgba(0,0,0,0.5)]">
     </div>
 
     <script type="module">
@@ -249,13 +202,13 @@
         // Load Data
         async function loadData() {
             try {
+                grid.innerHTML = `<div class="col-span-full text-center py-40"><i class="fa-solid fa-circle-notch fa-spin text-5xl text-neutral-800"></i><p class="text-neutral-600 font-mono text-xs mt-4">LOADING...</p></div>`;
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"));
                 const snap = await getDocs(q);
                 allData = [];
                 snap.forEach(doc => allData.push({ id: doc.id, ...doc.data() }));
                 applyFilters();
             } catch (error) {
-                console.error(error);
                 grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-20 font-mono text-sm">FAILED TO LOAD DATABASE</div>`;
             }
         }
@@ -273,16 +226,46 @@
                     (item.prompt && item.prompt.toLowerCase().includes(lowerTerm))
                 );
             }
-
             filteredData = temp;
             currentPage = 1;
             renderPagination();
         }
 
-        // Render Logic (Fixed Bug here)
+        // --- NEW: Function to change Main Image safely ---
+        window.setMainImage = (cardId, imgUrl, thumbEl) => {
+            // 1. เปลี่ยนรูปใหญ่
+            const mainImg = document.getElementById(`main-img-${cardId}`);
+            if(mainImg) mainImg.src = imgUrl;
+
+            // 2. จัดการ Border สีเหลืองของ Thumbnails
+            const thumbContainer = document.getElementById(`thumbs-${cardId}`);
+            if(thumbContainer) {
+                const thumbs = thumbContainer.querySelectorAll('img');
+                thumbs.forEach(t => {
+                    t.classList.remove('border-yellow-500');
+                    t.classList.add('border-neutral-800');
+                });
+                if(thumbEl) {
+                    thumbEl.classList.remove('border-neutral-800');
+                    thumbEl.classList.add('border-yellow-500');
+                }
+            }
+        };
+
+        // --- NEW: Lightbox ---
+        window.openLightbox = (imgId) => {
+            const imgEl = document.getElementById(imgId);
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            if(imgEl && lightbox && lightboxImg) {
+                lightboxImg.src = imgEl.src;
+                lightbox.classList.remove('hidden');
+            }
+        }
+
+        // Render
         function renderPagination() {
             grid.innerHTML = "";
-
             if (filteredData.length === 0) {
                 grid.innerHTML = `<div class="col-span-full text-center text-neutral-700 py-20 font-mono text-sm italic">NO DATA FOUND</div>`;
                 paginationControls.classList.add("hidden");
@@ -295,81 +278,87 @@
             const pageData = filteredData.slice(startIndex, endIndex);
 
             pageData.forEach(item => {
-                // Image handling
+                // Normalize Images
                 let images = [];
-                let hasImage = true;
-
                 if (Array.isArray(item.preview) && item.preview.length > 0) images = item.preview;
                 else if (Array.isArray(item.images) && item.images.length > 0) images = item.images;
                 else if (typeof item.preview === 'string') images = [item.preview];
                 
-                if(images.length === 0) {
-                    hasImage = false;
-                    images = []; 
-                }
+                const hasImage = images.length > 0;
+                const mainImageSrc = hasImage ? images[0] : '';
+                const uniqueId = item.id; // ใช้ ID ของเอกสารเป็น Key
 
-                // Thumbnails logic
+                // Thumbnails Logic
                 let thumbnailsHTML = '';
                 if (hasImage) {
-                    images.slice(0, 5).forEach((img, idx) => {
+                    // แสดงสูงสุด 5 รูป
+                    const showLimit = 5;
+                    const displayImages = images.slice(0, showLimit);
+                    const remaining = images.length - showLimit;
+
+                    displayImages.forEach((img, idx) => {
                         const borderClass = idx === 0 ? 'border-yellow-500' : 'border-neutral-800';
                         thumbnailsHTML += `
                             <img src="${img}" 
-                                 loading="lazy"
-                                 onmouseover="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${img}'; this.parentElement.querySelectorAll('img').forEach(el => el.classList.remove('border-yellow-500')); this.classList.add('border-yellow-500');"
+                                 onclick="window.setMainImage('${uniqueId}', '${img}', this)"
+                                 onmouseover="window.setMainImage('${uniqueId}', '${img}', this)"
                                  class="w-8 h-8 object-cover rounded-sm border ${borderClass} hover:border-white cursor-pointer transition bg-black"
                                  alt="thumb">
                         `;
                     });
+
+                    // ถ้ามีรูปเหลือ ให้แสดงป้าย +X
+                    if (remaining > 0) {
+                        thumbnailsHTML += `
+                            <div class="w-8 h-8 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-sm text-[9px] text-neutral-400 font-bold" title="${remaining} more images">
+                                +${remaining}
+                            </div>
+                        `;
+                    }
                 } else {
                     thumbnailsHTML = `<span class="text-[10px] text-neutral-600 font-mono self-center">TEXT ONLY</span>`;
                 }
 
-                // Main Image HTML
+                // Main Image Area
                 let mainImageHTML;
                 if (hasImage) {
                     mainImageHTML = `
-                        <img src="${images[0]}" 
+                        <img id="main-img-${uniqueId}" 
+                             src="${mainImageSrc}" 
                              alt="${item.title}" loading="lazy" 
-                             class="main-img w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">
+                             onclick="window.openLightbox('main-img-${uniqueId}')"
+                             class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105 cursor-zoom-in">
                     `;
                 } else {
                     mainImageHTML = `
-                        <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
-                            <i class="fa-solid fa-bolt text-4xl text-neutral-800 group-hover:text-yellow-500/50 transition duration-500"></i>
-                            <span class="text-[10px] font-mono text-neutral-700 mt-2 tracking-widest uppercase group-hover:text-neutral-500">No Preview</span>
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808]">
+                            <i class="fa-solid fa-bolt text-4xl text-neutral-800"></i>
+                            <span class="text-[10px] font-mono text-neutral-700 mt-2 uppercase">No Preview</span>
                         </div>
                     `;
                 }
 
-                // Safe prompt string
                 const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
                 
-                // Link
-                const detailLink = `view.html?id=${item.id}`; 
-
+                // สร้าง Card
                 const card = document.createElement('article');
                 card.className = "card rounded-xl flex flex-col h-full group";
-                
                 card.innerHTML = `
-                    <a href="${detailLink}" class="card-img-container block relative aspect-[4/3] bg-[#050505] border-b border-neutral-900 cursor-pointer overflow-hidden">
+                    <div class="card-img-container block relative aspect-[4/3] bg-[#050505] border-b border-neutral-900 overflow-hidden">
                         ${mainImageHTML}
-                        <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-white/10 z-10">
+                        <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-white/10 z-10 pointer-events-none">
                             ${item.category || "General"}
                         </div>
-                    </a>
+                    </div>
 
                     <div class="p-5 flex flex-col flex-1">
-                        
-                        <div class="flex items-center gap-1.5 mb-4 thumb-scroll overflow-x-auto h-9">
+                        <div id="thumbs-${uniqueId}" class="flex items-center gap-1.5 mb-4 overflow-x-auto h-9">
                             ${thumbnailsHTML}
                         </div>
                         
-                        <a href="${detailLink}" class="block mb-2 group-hover:text-yellow-400 transition-colors">
-                            <h2 class="text-base font-bold text-white line-clamp-1" title="${item.title}">
-                                ${item.title || "Untitled"}
-                            </h2>
-                        </a>
+                        <h2 class="text-base font-bold text-white line-clamp-1 mb-1 group-hover:text-yellow-400 transition-colors" title="${item.title}">
+                            ${item.title || "Untitled"}
+                        </h2>
 
                         <p class="text-neutral-500 text-xs mb-4 line-clamp-2 h-8 leading-relaxed font-medium">
                             ${item.note || "No details provided."}
@@ -394,7 +383,7 @@
                 grid.appendChild(card);
             });
 
-            // Pagination Controls UI
+            // Update Page Info
             pageInfo.innerText = `PAGE ${currentPage} / ${totalPages}`;
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
@@ -405,10 +394,7 @@
         // Listeners
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
-                tabs.forEach(t => {
-                    t.classList.remove("bg-yellow-400", "text-black");
-                    t.classList.add("bg-black", "text-neutral-400", "border-neutral-800");
-                });
+                tabs.forEach(t => { t.classList.remove("bg-yellow-400", "text-black"); t.classList.add("bg-black", "text-neutral-400", "border-neutral-800"); });
                 tab.classList.remove("bg-black", "text-neutral-400", "border-neutral-800");
                 tab.classList.add("bg-yellow-400", "text-black");
                 currentCategory = tab.dataset.cat;
@@ -416,22 +402,10 @@
             });
         });
 
-        itemsPerPageSelect.addEventListener("change", (e) => {
-            itemsPerPage = parseInt(e.target.value);
-            currentPage = 1;
-            renderPagination();
-        });
-
+        itemsPerPageSelect.addEventListener("change", (e) => { itemsPerPage = parseInt(e.target.value); currentPage = 1; renderPagination(); });
         prevBtn.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderPagination(); window.scrollTo(0,0); } });
-        nextBtn.addEventListener("click", () => { 
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            if (currentPage < totalPages) { currentPage++; renderPagination(); window.scrollTo(0,0); } 
-        });
-
-        searchInput.addEventListener("input", (e) => {
-            searchTerm = e.target.value.trim();
-            applyFilters();
-        });
+        nextBtn.addEventListener("click", () => { const total = Math.ceil(filteredData.length / itemsPerPage); if (currentPage < total) { currentPage++; renderPagination(); window.scrollTo(0,0); } });
+        searchInput.addEventListener("input", (e) => { searchTerm = e.target.value.trim(); applyFilters(); });
 
         window.copyToClipboard = (text) => {
             if(!text) return;
