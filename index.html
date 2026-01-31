@@ -45,33 +45,67 @@
             --bg-card: #090909;
             --border-color: #1a1a1a;
             --accent: #FACC15;
+            --accent-dim: #CA8A04;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-body);
             color: #f1f1f1;
-            background-image: radial-gradient(circle at 50% 0%, #151500 0%, #020202 60%);
+            /* Background Grid Pattern */
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center top;
         }
 
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 0%, var(--bg-body) 90%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-body); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
+        /* Card Styles */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
         
         .card:hover {
-            border-color: #333;
+            border-color: #444;
             transform: translateY(-4px);
-            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.8);
         }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::after { transform: scaleX(1); }
+
+        .card-img-container { overflow: hidden; }
+        .card-img-container img.main-img { transition: transform 0.5s ease; }
+        .card:hover .card-img-container img.main-img { transform: scale(1.05); }
 
         .prompt-code {
             font-family: 'JetBrains Mono', monospace;
@@ -79,11 +113,12 @@
             border: 1px solid #222;
         }
 
-        /* Thumb Scrollbar */
+        /* Horizontal Scroll for Thumbnails */
         .thumb-scroll::-webkit-scrollbar { height: 4px; }
         .thumb-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
         .thumb-scroll { scrollbar-width: thin; scrollbar-color: #333 transparent; }
 
+        /* Animations */
         @keyframes slideUpFade {
             from { transform: translate(-50%, 20px); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
@@ -96,6 +131,8 @@
 </head>
 
 <body class="min-h-screen flex flex-col relative">
+    
+    <div class="bg-overlay"></div>
 
     <header class="border-b border-neutral-900 bg-black/90 backdrop-blur-xl sticky top-0 z-50">
         <div class="max-w-[1400px] mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-5">
@@ -108,24 +145,24 @@
                         NANO<span class="text-yellow-400">BANANA</span>
                     </h1>
                     <span class="text-[10px] text-neutral-500 font-mono tracking-[0.3em] uppercase block">
-                        PROMPT GALLERY
+                        Gallery v2.0
                     </span>
                 </div>
             </div>
 
             <div class="relative w-full md:w-96 group">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-600 group-focus-within:text-yellow-400 transition"></i>
-                <input type="text" id="searchInput" placeholder="Search prompts..." 
+                <input type="text" id="searchInput" placeholder="Search style, model, or keyword..." 
                        class="w-full bg-[#0a0a0a] border border-neutral-800 text-neutral-200 text-sm rounded-full py-3 pl-11 pr-5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition placeholder-neutral-700">
             </div>
         </div>
     </header>
-
-    <main class="flex-1 max-w-[1400px] mx-auto px-4 md:px-6 py-10 w-full z-10">
+	
+<main class="flex-1 max-w-[1400px] mx-auto px-4 md:px-6 py-10 w-full z-10">
         
         <div class="flex flex-col lg:flex-row justify-between items-center mb-10 gap-6">
             <div class="flex flex-wrap gap-2 justify-center lg:justify-start" id="tabContainer">
-                <button class="tab-btn active bg-yellow-400 text-black px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:bg-yellow-300" data-cat="All">All</button>
+                <button class="tab-btn active bg-yellow-400 text-black px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:bg-yellow-300" data-cat="All">All Prompts</button>
                 <button class="tab-btn bg-black border border-neutral-800 text-neutral-400 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:border-yellow-400 hover:text-white" data-cat="Photorealism">Photorealism</button>
                 <button class="tab-btn bg-black border border-neutral-800 text-neutral-400 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:border-yellow-400 hover:text-white" data-cat="Anime">Anime</button>
                 <button class="tab-btn bg-black border border-neutral-800 text-neutral-400 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition hover:border-yellow-400 hover:text-white" data-cat="Landscape">Landscape</button>
@@ -133,7 +170,7 @@
             </div>
 
             <div class="flex items-center gap-3 text-xs text-neutral-500 font-mono border-l border-neutral-800 pl-6 h-8">
-                <span>SHOW:</span>
+                <span>VIEW:</span>
                 <select id="itemsPerPage" class="bg-black border border-neutral-800 text-white rounded px-3 py-1 focus:outline-none focus:border-yellow-400 cursor-pointer hover:border-neutral-600 transition">
                     <option value="30" selected>30</option>
                     <option value="60">60</option>
@@ -144,8 +181,11 @@
 
         <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
             <div class="col-span-full text-center py-40">
-                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-yellow-400 mb-4"></i>
-                <p class="text-neutral-600 font-mono text-xs tracking-widest uppercase">Loading Database...</p>
+                <div class="inline-block relative">
+                    <i class="fa-solid fa-circle-notch fa-spin text-5xl text-neutral-800"></i>
+                    <i class="fa-solid fa-bolt text-xl text-yellow-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
+                </div>
+                <p class="text-neutral-600 font-mono text-xs tracking-[0.3em] mt-4 uppercase">Initializing System...</p>
             </div>
         </div>
 
@@ -161,20 +201,26 @@
 
     </main>
 
-    <footer class="border-t border-neutral-900 bg-[#050505] py-12 text-center mt-10">
+    <footer class="border-t border-neutral-900 bg-[#050505] py-12 text-center z-10 mt-10">
         <div class="max-w-7xl mx-auto px-6">
+            <div class="w-8 h-8 bg-neutral-900 rounded flex items-center justify-center text-neutral-600 mx-auto mb-4">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
             <p class="text-neutral-600 text-xs font-mono uppercase tracking-[0.2em] mb-2">
                 &copy; 2026 Nano Banana Prompts
+            </p>
+            <p class="text-neutral-800 text-[10px]">
+                Made for Creators
             </p>
         </div>
     </footer>
 
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-6 py-3 rounded font-bold shadow-[0_0_30px_rgba(250,204,21,0.4)] hidden items-center gap-3 z-50">
         <i class="fa-solid fa-check text-lg"></i>
-        <span class="uppercase tracking-wide text-xs">Copied!</span>
+        <span class="uppercase tracking-wide text-xs">Prompt Copied</span>
     </div>
-
-    <script type="module">
+	
+	<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -187,7 +233,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // State
+        // State Variables
         let allData = [];
         let filteredData = [];
         let currentPage = 1;
@@ -195,7 +241,7 @@
         let currentCategory = "All";
         let searchTerm = "";
 
-        // Elements
+        // DOM Elements
         const grid = document.getElementById("grid");
         const paginationControls = document.getElementById("paginationControls");
         const prevBtn = document.getElementById("prevBtn");
@@ -205,7 +251,7 @@
         const searchInput = document.getElementById("searchInput");
         const tabs = document.querySelectorAll(".tab-btn");
 
-        // Load
+        // Load Data Function
         async function loadData() {
             try {
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"));
@@ -215,11 +261,11 @@
                 applyFilters();
             } catch (error) {
                 console.error(error);
-                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-20 font-mono text-sm">ERROR LOADING DATA</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-20 font-mono text-sm">FAILED TO LOAD DATABASE</div>`;
             }
         }
 
-        // Filters
+        // Filter Logic
         function applyFilters() {
             let temp = currentCategory === "All" 
                 ? allData 
@@ -237,10 +283,8 @@
             currentPage = 1;
             renderPagination();
         }
-
-        // ------------------------------------------------------------------
-        // RENDER LOGIC (แก้ไขใหม่ตามโจทย์)
-        // ------------------------------------------------------------------
+		
+		// Render Logic (UPDATED: Fixed Image Sources)
         function renderPagination() {
             grid.innerHTML = "";
 
@@ -256,69 +300,88 @@
             const pageData = filteredData.slice(startIndex, endIndex);
 
             pageData.forEach(item => {
+                // 1. MAIN IMAGE (PREVIEW / AFTER) 
+                // ดึงจาก field 'preview' เท่านั้น
+                let previewSrc = null;
+                if (Array.isArray(item.preview) && item.preview.length > 0) previewSrc = item.preview[0];
+                else if (typeof item.preview === 'string' && item.preview) previewSrc = item.preview;
                 
-                // --- 1. จัดการรูปภาพ ---
-                
-                // A. Preview (รูปผลลัพธ์/After) -> ใช้เป็นรูปใหญ่
-                let previewUrl = "https://via.placeholder.com/400x300/080808/333?text=NO+PREVIEW"; // Default
-                if (Array.isArray(item.preview) && item.preview.length > 0) previewUrl = item.preview[0];
-                else if (typeof item.preview === 'string' && item.preview) previewUrl = item.preview;
-
-                // B. Images (รูปต้นฉบับ/Before) -> ใช้เป็น Thumbnails
-                let sourceImages = [];
-                if (Array.isArray(item.images)) sourceImages = item.images;
-                else if (typeof item.images === 'string' && item.images) sourceImages = [item.images];
-
-                // ถ้าไม่มี Preview ให้เอารูปแรกของ Images มาโชว์แทน (กันไว้ก่อน)
-                if (previewUrl.includes("NO+PREVIEW") && sourceImages.length > 0) {
-                    previewUrl = sourceImages[0];
+                // Fallback: ถ้าไม่มี preview ให้ใช้รูปแรกของ images หรือ Placeholder
+                if (!previewSrc) {
+                    if (Array.isArray(item.images) && item.images.length > 0) previewSrc = item.images[0];
+                    else previewSrc = ""; // Empty implies no image
                 }
 
-                // --- 2. สร้าง Thumbnails HTML ---
+                // 2. THUMBNAILS (IMAGES / BEFORE)
+                // ดึงจาก field 'images' เท่านั้น
+                let thumbImages = [];
+                if (Array.isArray(item.images) && item.images.length > 0) thumbImages = item.images;
+                
+                // === HTML GENERATION ===
+
+                // Main Image HTML
+                let mainImageHTML;
+                if (previewSrc) {
+                    mainImageHTML = `
+                        <img src="${previewSrc}" 
+                             alt="${item.title}" loading="lazy" 
+                             class="main-img w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">
+                    `;
+                } else {
+                    mainImageHTML = `
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
+                            <i class="fa-solid fa-bolt text-4xl text-neutral-800 group-hover:text-yellow-500/50 transition duration-500"></i>
+                            <span class="text-[10px] font-mono text-neutral-700 mt-2 tracking-widest uppercase group-hover:text-neutral-500">No Preview</span>
+                        </div>
+                    `;
+                }
+
+                // Thumbnails HTML
                 let thumbnailsHTML = '';
-                if (sourceImages.length > 0) {
-                    sourceImages.slice(0, 5).forEach((img, idx) => {
+                if (thumbImages.length > 0) {
+                    thumbImages.slice(0, 5).forEach((img, idx) => {
+                        // รูปเล็กมาจาก images
                         thumbnailsHTML += `
                             <img src="${img}" 
                                  loading="lazy"
-                                 onmouseover="this.closest('.card').querySelector('.main-img').src='${img}'"
-                                 onmouseout="this.closest('.card').querySelector('.main-img').src='${previewUrl}'"
-                                 class="w-8 h-8 object-cover rounded-sm border border-neutral-800 hover:border-yellow-400 cursor-pointer transition bg-black"
-                                 alt="source-${idx}">
+                                 onmouseover="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${img}'"
+                                 onmouseout="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${previewSrc}'"
+                                 class="w-8 h-8 object-cover rounded-sm border border-neutral-800 hover:border-yellow-500 cursor-pointer transition bg-black"
+                                 alt="ref-img">
                         `;
                     });
                 } else {
-                    // ถ้าไม่มีรูป Source ให้แสดงข้อความว่า Text Only หรือ No Source
-                    thumbnailsHTML = `<span class="text-[9px] text-neutral-700 font-mono self-center">NO SOURCE IMG</span>`;
+                    thumbnailsHTML = `<span class="text-[10px] text-neutral-700 font-mono self-center">No Ref Images</span>`;
                 }
 
-                // --- 3. สร้าง Card HTML ---
+                // Safe prompt string
                 const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
                 
+                // Link
+                const detailLink = `view.html?id=${item.id}`; 
+
                 const card = document.createElement('article');
                 card.className = "card rounded-xl flex flex-col h-full group";
                 
                 card.innerHTML = `
-                    <div class="card-img-container block relative aspect-[4/3] bg-[#050505] border-b border-neutral-900 overflow-hidden">
-                        <img src="${previewUrl}" 
-                             alt="${item.title}" loading="lazy" 
-                             class="main-img w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500">
-                        
-                        <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-yellow-400 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-white/10 z-10">
+                    <a href="${detailLink}" class="card-img-container block relative aspect-[4/3] bg-[#050505] border-b border-neutral-900 cursor-pointer overflow-hidden">
+                        ${mainImageHTML}
+                        <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-white/10 z-10">
                             ${item.category || "General"}
                         </div>
-                    </div>
+                    </a>
 
                     <div class="p-5 flex flex-col flex-1">
                         
                         <div class="flex items-center gap-1.5 mb-4 thumb-scroll overflow-x-auto h-9">
-                            <span class="text-[9px] text-neutral-500 font-bold mr-1">INPUT:</span>
                             ${thumbnailsHTML}
                         </div>
                         
-                        <h2 class="text-base font-bold text-white line-clamp-1 mb-1 group-hover:text-yellow-400 transition-colors" title="${item.title}">
-                            ${item.title || "Untitled"}
-                        </h2>
+                        <a href="${detailLink}" class="block mb-2 group-hover:text-yellow-400 transition-colors">
+                            <h2 class="text-base font-bold text-white line-clamp-1" title="${item.title}">
+                                ${item.title || "Untitled"}
+                            </h2>
+                        </a>
 
                         <p class="text-neutral-500 text-xs mb-4 line-clamp-2 h-8 leading-relaxed font-medium">
                             ${item.note || "No details provided."}
@@ -343,15 +406,15 @@
                 grid.appendChild(card);
             });
 
+            // Pagination Controls UI
             pageInfo.innerText = `PAGE ${currentPage} / ${totalPages}`;
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
-            
             if (totalPages > 1) paginationControls.classList.remove("hidden");
             else paginationControls.classList.add("hidden");
         }
-
-        // Listeners
+		
+		// Listeners
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 tabs.forEach(t => {
@@ -391,7 +454,7 @@
             });
         };
 
-        // Start
+        // Start App
         loadData();
     </script>
 </body>
