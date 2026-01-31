@@ -5,22 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Loading Prompt... | Nano Banana Prompts</title>
-    <meta name="description" content="View detailed AI prompt and image preview.">
-    
-    <meta property="og:title" content="Nano Banana Prompts">
-    <meta property="og:description" content="Discover high-quality AI prompts.">
-    <meta property="og:image" content="https://via.placeholder.com/1200x630">
-    <meta property="og:type" content="article">
+	<meta name="description" content="Loading prompt...">
+    <meta name="robots" content="index, follow">
 
-    <script type="application/ld+json" id="json-ld">
-    {
-      "@context": "https://schema.org",
-      "@type": "ImageObject",
-      "name": "Nano Banana Prompt",
-      "description": "AI Generated Art Prompt",
-      "contentUrl": ""
-    }
-    </script>
+    <meta property="og:title" content="Nano Banana Prompts | AI Prompt Gallery & Generator">
+    <meta property="og:description" content="A curated AI prompt gallery and generator. Explore styles, save prompts, and generate stunning AI results.">
+
+    <meta property="og:url" content="https://prompt-gallery.github.io/nano-banana-prompts/">
+    <meta property="og:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nano Banana Prompts">
+    <meta name="twitter:description" content="A modern AI prompt gallery and generator for creative content.">
+    <meta name="twitter:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -78,7 +75,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Animation Keyframes (เพิ่มส่วนนี้เพื่อให้ animate-fade-in ทำงาน) */
+        /* Animation Keyframes */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -300,7 +297,7 @@
                     // 2. Update SEO
                     updateSEO(promptData);
                     
-                    // 3. โหลด Related (ทำงานต่อแน่นอน เพราะ renderPage ไม่ return ทิ้งกลางทางแล้ว)
+                    // 3. โหลด Related
                     loadRelated(promptData.id); 
                 } else {
                     document.getElementById("loadingState").innerHTML = "<p class='text-red-500 font-mono'>PROMPT NOT FOUND (404)</p>";
@@ -335,10 +332,12 @@
             }
             document.getElementById("dateText").innerText = dateStr;
 
-            // --- Images Logic (แก้ไขใหม่ ใช้ if/else) ---
-            const previewImgs = normalizeArr(data.preview);
-            const mainImgs = normalizeArr(data.images);
-            let allImages = [...new Set([...previewImgs, ...mainImgs])];
+            // --- Images Logic (UPDATED: before/after) ---
+            const afterImgs = normalizeArr(data.after);  // ใช้ after แทน preview (รูปผลลัพธ์)
+            const beforeImgs = normalizeArr(data.before); // ใช้ before แทน images (รูปต้นฉบับ)
+            
+            // รวมรูปทั้งหมด โดยเอา After ขึ้นก่อนเพื่อให้เห็นผลลัพธ์ก่อน
+            let allImages = [...new Set([...afterImgs, ...beforeImgs])];
 
             const mainImg = document.getElementById("mainImage");
             const thumbContainer = document.getElementById("thumbContainer");
@@ -347,7 +346,6 @@
             // เช็คว่ามีรูปไหม?
             if (allImages.length === 0) {
                 // --- กรณีไม่มีรูป (Text Only) ---
-                // แทนที่ <img> ด้วย Placeholder Icon
                 mainImg.parentElement.innerHTML = `
                     <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
                         <i class="fa-solid fa-bolt text-6xl text-neutral-800 group-hover:text-yellow-500/60 transition duration-500"></i>
@@ -357,14 +355,12 @@
                     </div>
                 `;
                 
-                // แจ้งเตือนตรง Thumbnails
                 thumbContainer.innerHTML = `
                     <span class="text-[10px] text-neutral-600 font-mono self-center border border-neutral-800 px-3 py-1 rounded-full">
                         TEXT ONLY PROMPT
                     </span>
                 `;
 
-                // ซ่อนปุ่ม Download
                 if(downloadBtn) downloadBtn.style.display = 'none';
 
             } else {
@@ -405,38 +401,47 @@
                     thumbContainer.appendChild(thumb);
                 });
             }
-            
-            // จบฟังก์ชันโดยไม่ return ทิ้ง ทำให้ initPage ทำงานบรรทัดต่อไป (loadRelated) ได้ถูกต้อง
         }
 
-        function updateSEO(data) {
-            document.title = `${data.title} | Nano Banana Prompts`;
-            const desc = data.note || `Get the AI prompt for "${data.title}"`;
-            
-            // Update Meta Tags
-            const metaDesc = document.querySelector('meta[name="description"]');
-            if(metaDesc) metaDesc.setAttribute("content", desc);
-            
-            const ogTitle = document.querySelector('meta[property="og:title"]');
-            if(ogTitle) ogTitle.setAttribute("content", data.title);
-            
-            const ogDesc = document.querySelector('meta[property="og:description"]');
-            if(ogDesc) ogDesc.setAttribute("content", desc);
+function updateSEO(data) {
+    const url = window.location.href;
 
-            // Update Schema
-            const mainImgEl = document.getElementById("mainImage");
-            // ถ้ามีรูปใช้ src ถ้าไม่มีใช้ placeholder
-            const mainImgSrc = mainImgEl ? mainImgEl.src : "https://via.placeholder.com/1200x630";
-            
-            const schema = {
-                "@context": "https://schema.org",
-                "@type": "ImageObject",
-                "name": data.title,
-                "description": desc,
-                "contentUrl": mainImgSrc
-            };
-            document.getElementById("json-ld").textContent = JSON.stringify(schema);
-        }
+    document.title = `${data.title} | Nano Banana Prompts`;
+    
+    document.querySelector('meta[name="description"]')
+      .setAttribute("content", data.note || data.title);
+
+    // canonical
+    let canonical = document.querySelector("link[rel=canonical]");
+    if (!canonical) {
+        canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        document.head.appendChild(canonical);
+    }
+    canonical.href = url;
+
+    // og
+    document.querySelector('meta[property="og:title"]').content = data.title;
+    document.querySelector('meta[property="og:description"]').content = data.note || data.title;
+    document.querySelector('meta[property="og:url"]').content = url;
+
+    // twitter
+    document.querySelector('meta[name="twitter:title"]').content = data.title;
+    document.querySelector('meta[name="twitter:description"]').content = data.note || data.title;
+
+    // schema
+    const mainImg = document.getElementById("mainImage")?.src || "";
+    document.querySelector("script[type='application/ld+json']").textContent =
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "name": data.title,
+        "description": data.note || "",
+        "contentUrl": mainImg,
+        "url": url
+      });
+}
+
 
         async function loadRelated(currentId) {
             const grid = document.getElementById("relatedGrid");
@@ -462,12 +467,11 @@
                 }
 
                 related.forEach(item => {
-                    // หารูปปก
+                    // หารูปปก (ใช้ after ก่อน, ถ้าไม่มีใช้ before)
                     let img = "";
-                    if (item.preview && item.preview[0]) img = item.preview[0];
-                    else if (item.images && item.images[0]) img = item.images[0];
+                    if (item.after && item.after[0]) img = item.after[0];
+                    else if (item.before && item.before[0]) img = item.before[0];
                     
-                    // ถ้าไม่มีรูป ให้ใช้ Placeholder สีดำ
                     const imgHTML = img 
                         ? `<img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700">`
                         : `<div class="w-full h-full bg-[#080808] flex items-center justify-center"><i class="fa-solid fa-bolt text-neutral-800 text-2xl group-hover:text-yellow-500 transition"></i></div>`;
