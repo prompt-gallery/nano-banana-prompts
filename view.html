@@ -446,12 +446,13 @@ function updateSEO(data) {
         async function loadRelated(currentId) {
             const grid = document.getElementById("relatedGrid");
             try {
-                // ดึง 8 รายการล่าสุดมา (เผื่อตัดตัวปัจจุบันออก)
+                // 1. ดึงข้อมูล 8 รายการล่าสุด
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(8));
                 const snap = await getDocs(q);
                 
                 let related = [];
                 snap.forEach(doc => {
+                    // ไม่เอาตัวปัจจุบัน
                     if (doc.id !== currentId) {
                         related.push({ id: doc.id, ...doc.data() });
                     }
@@ -460,29 +461,42 @@ function updateSEO(data) {
                 // ตัดให้เหลือ 4 รายการ
                 related = related.slice(0, 4);
 
+                // 2. เคลียร์ข้อความ Loading ออก
                 grid.innerHTML = "";
+
+                // 3. ถ้าไม่มีข้อมูล
                 if (related.length === 0) {
                     grid.innerHTML = `<div class="col-span-full text-center text-neutral-800 text-xs font-mono mt-10">No related prompts found.</div>`;
                     return;
                 }
 
+                // 4. วนลูปสร้าง Card
                 related.forEach(item => {
-                    // หารูปปก (ใช้ after ก่อน, ถ้าไม่มีใช้ before)
-                    let img = "";
-                    if (item.after && item.after[0]) img = item.after[0];
-                    else if (item.before && item.before[0]) img = item.before[0];
+                    // --- แก้ไข Logic การดึงรูป (รองรับทั้งชื่อเก่าและใหม่) ---
                     
+                    // แปลงข้อมูลให้เป็น Array ให้หมดก่อน (ใช้ฟังก์ชัน normalizeArr ที่มีอยู่แล้ว)
+                    // ลำดับความสำคัญ: after -> preview -> before -> images
+                    const afterImgs = normalizeArr(item.after || item.preview);
+                    const beforeImgs = normalizeArr(item.before || item.images);
+                    
+                    let img = "";
+                    if (afterImgs.length > 0) img = afterImgs[0];      // ลองรูปผลลัพธ์ก่อน
+                    else if (beforeImgs.length > 0) img = beforeImgs[0]; // ถ้าไม่มีลองรูปต้นฉบับ
+                    
+                    // ถ้ามีรูป ให้แสดงรูป / ถ้าไม่มี ให้แสดงไอคอนสายฟ้า
                     const imgHTML = img 
-                        ? `<img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700">`
+                        ? `<img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700" loading="lazy">`
                         : `<div class="w-full h-full bg-[#080808] flex items-center justify-center"><i class="fa-solid fa-bolt text-neutral-800 text-2xl group-hover:text-yellow-500 transition"></i></div>`;
 
                     const card = document.createElement("a");
+                    // ลิงก์ไปยังหน้า view.html พร้อม ID
                     card.href = `view.html?id=${item.id}`; 
-                    card.className = "block bg-[#090909] border border-neutral-900 rounded-lg overflow-hidden group hover:border-neutral-700 transition";
+                    card.className = "block bg-[#090909] border border-neutral-900 rounded-lg overflow-hidden group hover:border-neutral-700 transition shadow-lg";
+                    
                     card.innerHTML = `
                         <div class="h-40 overflow-hidden bg-black relative">
                             ${imgHTML}
-                             <div class="absolute top-2 left-2 bg-black/80 backdrop-blur text-yellow-400 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-yellow-500/20">
+                             <div class="absolute top-2 left-2 bg-black/80 backdrop-blur text-yellow-400 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-yellow-500/20 shadow-md">
                                 ${item.category || "General"}
                             </div>
                         </div>
@@ -495,8 +509,8 @@ function updateSEO(data) {
                 });
 
             } catch (e) {
-                console.error("Related error", e);
-                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs">Failed to load suggestions</div>`;
+                console.error("Related error:", e); // ดู Error ใน Console (F12)
+                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs py-10">Failed to load suggestions</div>`;
             }
         }
 
