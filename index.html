@@ -4,30 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Primary SEO -->
     <title>Nano Banana Prompts | AI Prompt Gallery & Generator</title>
     <meta name="description" content="Nano Banana Prompts is a curated AI prompt gallery and generator. Discover creative styles, save prompts, and generate stunning AI content.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://prompt-gallery.github.io/nano-banana-prompts/">
-
-    <!-- Open Graph -->
     <meta property="og:title" content="Nano Banana Prompts | AI Prompt Gallery & Generator">
     <meta property="og:description" content="A curated AI prompt gallery and generator for creative content. Explore styles, save prompts, and generate stunning AI results.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://prompt-gallery.github.io/nano-banana-prompts/">
     <meta property="og:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
-
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Nano Banana Prompts">
     <meta name="twitter:description" content="A modern AI prompt gallery and generator for creative content.">
     <meta name="twitter:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
-
-    <!-- Favicon / App Icon -->
     <link rel="icon" href="/nano-banana-prompts/favicon.ico">
     <link rel="apple-touch-icon" href="/nano-banana-prompts/icon-180.png">
-
-    <!-- Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -35,118 +26,128 @@
       "name": "Nano Banana Prompts",
       "url": "https://prompt-gallery.github.io/nano-banana-prompts/",
       "description": "A curated AI prompt gallery and generator for creative content.",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Nano Banana Prompts"
-      }
+      "publisher": { "@type": "Organization", "name": "Nano Banana Prompts" }
     }
     </script>
 
-    <!-- UI / Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
-	
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* Theme Configuration */
-:root {
-    --bg-body: #070707;
-    --bg-card: #0f0f0f;
-    --accent: #F5C542;        /* Gold */
-    --accent-hover: #FFD766;  /* Gold Glow */
-}
+        /* --- Modern Dark Theme Config --- */
+        :root {
+            --bg-deep: #050505;
+            --bg-surface: #0f0f0f;
+            --accent-primary: #FACC15; /* Yellow-400 */
+            --accent-glow: rgba(250, 204, 21, 0.15);
+        }
 
-body { 
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background:
-        radial-gradient(circle at 50% 0%, #2a2200 0%, #070707 55%);
-    color: #f1f1f1;
-}
-
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #f1f1f1;
+            /* พื้นหลังแบบ Subtle Gradient */
+            background-image: radial-gradient(circle at 50% -20%, #1a1a08 0%, #050505 60%);
+            min-height: 100vh;
+        }
 
         /* Card Styles */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid #222;
-            transition: all 0.3s ease;
+        .card-glass {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px -10px rgba(250, 204, 21, 0.15);
+        
+        .card-glass:hover {
+            border-color: rgba(250, 204, 21, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px -10px var(--accent-glow);
         }
 
-        /* Prompt Box Code Style */
-        .prompt-code {
+        /* Thumbnail Active State */
+        .thumb-active {
+            border-color: var(--accent-primary) !important;
+            opacity: 1 !important;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+        
+        /* Hide Horizontal Scrollbar in Gallery */
+        .gallery-scroll::-webkit-scrollbar { display: none; }
+        .gallery-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Code/Prompt Box */
+        .prompt-terminal {
             font-family: 'JetBrains Mono', monospace;
             background: #000;
             border: 1px solid #222;
+            position: relative;
         }
-
-        /* Thumbnails Scrollbar (Hidden) */
-        .thumb-scroll::-webkit-scrollbar { display: none; }
-        .thumb-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .prompt-terminal::before {
+            content: '$ prompt';
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 10px;
+            color: #555;
+            pointer-events: none;
+        }
 
         /* Toast Animation */
-        @keyframes slideUpFade {
-            from { transform: translate(-50%, 20px); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
+        @keyframes toastSlide {
+            0% { transform: translate(-50%, 20px); opacity: 0; }
+            100% { transform: translate(-50%, 0); opacity: 1; }
         }
-        .toast-active {
-            display: flex !important;
-            animation: slideUpFade 0.3s forwards;
-        }
+        .toast-active { display: flex !important; animation: toastSlide 0.3s forwards; }
     </style>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-	
 </head>
 
-<body class="min-h-screen flex flex-col">
+<body class="flex flex-col">
 
-    <header class="border-b border-neutral-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3 select-none">
-                <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-black text-xl shadow-[0_0_15px_rgba(250,204,21,0.4)]">
+    <header class="border-b border-white/5 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-5">
+            <div class="flex items-center gap-3.5 select-none group cursor-pointer" onclick="window.scrollTo(0,0)">
+                <div class="relative w-11 h-11 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-xl flex items-center justify-center text-black text-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] group-hover:scale-105 transition duration-300">
                     <i class="fa-solid fa-bolt"></i>
+                    <div class="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition"></div>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-extrabold text-white tracking-tight uppercase leading-none">
+                    <h1 class="text-2xl font-black text-white tracking-tight leading-none">
                         NANO<span class="text-yellow-400">BANANA</span>
                     </h1>
-                    <span class="text-[10px] text-neutral-500 font-mono tracking-[0.3em] uppercase block mt-1">
-                        PROMPTS GALLERY
+                    <span class="text-[10px] text-neutral-500 font-bold tracking-[0.3em] uppercase block mt-1 group-hover:text-yellow-400 transition">
+                        Prompt Gallery
                     </span>
                 </div>
             </div>
 
-            <div class="relative w-full md:w-80">
-                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
-                <input type="text" id="searchInput" placeholder="Search prompts..." 
-                       class="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-sm rounded-full py-2.5 pl-10 pr-4 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition placeholder-neutral-600">
+            <div class="relative w-full md:w-96 group">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-yellow-400 transition"></i>
+                <input type="text" id="searchInput" placeholder="Search for styles, anime, realistic..." 
+                       class="w-full bg-[#111] border border-neutral-800 text-neutral-200 text-sm rounded-full py-3 pl-11 pr-5 focus:outline-none focus:border-yellow-500/50 focus:bg-black focus:ring-1 focus:ring-yellow-500/50 transition placeholder-neutral-600 shadow-inner">
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto px-4 md:px-6 py-8 w-full">
+    <main class="flex-1 max-w-[90rem] mx-auto px-4 md:px-8 py-10 w-full">
         
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <div class="flex flex-wrap gap-2 justify-center md:justify-start" id="tabContainer">
-                <button class="tab-btn active bg-yellow-400 text-black px-5 py-2 rounded-full text-sm font-bold transition hover:bg-yellow-300" data-cat="All">All</button>
-                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="Photorealism">Photorealism</button>
-                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="Anime">Anime</button>
-                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="Landscape">Landscape</button>
-                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="E-commerce">E-commerce</button>
+        <div class="flex flex-col xl:flex-row justify-between items-center mb-10 gap-6">
+            <div class="flex flex-wrap justify-center gap-2" id="tabContainer">
+                <button class="tab-btn active bg-yellow-400 text-black px-6 py-2 rounded-full text-sm font-bold shadow-[0_0_15px_rgba(250,204,21,0.2)] transition hover:scale-105" data-cat="All">All</button>
+                <button class="tab-btn bg-[#1a1a1a] text-neutral-400 border border-neutral-800 px-6 py-2 rounded-full text-sm font-bold hover:border-yellow-500/50 hover:text-white transition" data-cat="Photorealism">Photorealism</button>
+                <button class="tab-btn bg-[#1a1a1a] text-neutral-400 border border-neutral-800 px-6 py-2 rounded-full text-sm font-bold hover:border-yellow-500/50 hover:text-white transition" data-cat="Anime">Anime</button>
+                <button class="tab-btn bg-[#1a1a1a] text-neutral-400 border border-neutral-800 px-6 py-2 rounded-full text-sm font-bold hover:border-yellow-500/50 hover:text-white transition" data-cat="Landscape">Landscape</button>
+                <button class="tab-btn bg-[#1a1a1a] text-neutral-400 border border-neutral-800 px-6 py-2 rounded-full text-sm font-bold hover:border-yellow-500/50 hover:text-white transition" data-cat="E-commerce">E-commerce</button>
             </div>
 
-            <div class="flex items-center gap-2 text-sm text-neutral-400">
-                <span>Show:</span>
-                <select id="itemsPerPage" class="bg-neutral-900 border border-neutral-800 text-white rounded px-2 py-1 focus:outline-none focus:border-yellow-400">
+            <div class="flex items-center gap-3 text-sm text-neutral-400 bg-[#111] px-4 py-2 rounded-full border border-neutral-800">
+                <span class="text-xs font-bold uppercase tracking-wider">Show rows:</span>
+                <select id="itemsPerPage" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer">
                     <option value="30" selected>30</option>
                     <option value="60">60</option>
                     <option value="100">100</option>
@@ -154,46 +155,53 @@ body {
             </div>
         </div>
 
-        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-32">
-                <i class="fa-solid fa-circle-notch fa-spin text-5xl text-yellow-400 mb-4"></i>
-                <p class="text-neutral-500 font-mono text-sm tracking-widest">LOADING DATABASE...</p>
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+            <div class="col-span-full text-center py-40">
+                <div class="inline-block relative">
+                    <i class="fa-solid fa-circle-notch fa-spin text-6xl text-yellow-500/20"></i>
+                    <i class="fa-solid fa-bolt text-xl text-yellow-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"></i>
+                </div>
+                <p class="text-neutral-500 font-mono text-xs tracking-[0.3em] mt-4">ESTABLISHING CONNECTION...</p>
             </div>
         </div>
 
-        <div id="paginationControls" class="mt-12 flex justify-center items-center gap-4 hidden">
-            <button id="prevBtn" class="bg-neutral-900 border border-neutral-800 text-white px-4 py-2 rounded hover:border-yellow-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-chevron-left"></i> Prev
+        <div id="paginationControls" class="mt-16 flex justify-center items-center gap-6 hidden">
+            <button id="prevBtn" class="w-10 h-10 rounded-full bg-[#111] border border-neutral-800 text-white hover:border-yellow-500 hover:text-yellow-500 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center">
+                <i class="fa-solid fa-chevron-left"></i>
             </button>
-            <span id="pageInfo" class="text-neutral-400 text-sm font-mono">Page 1 of 1</span>
-            <button id="nextBtn" class="bg-neutral-900 border border-neutral-800 text-white px-4 py-2 rounded hover:border-yellow-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                Next <i class="fa-solid fa-chevron-right"></i>
+            <span id="pageInfo" class="text-neutral-500 text-xs font-mono uppercase tracking-widest">Page 1 of 1</span>
+            <button id="nextBtn" class="w-10 h-10 rounded-full bg-[#111] border border-neutral-800 text-white hover:border-yellow-500 hover:text-yellow-500 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center">
+                <i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
 
     </main>
 
-    <footer class="border-t border-neutral-800 bg-black py-10 text-center">
+    <footer class="border-t border-white/5 bg-black py-12 text-center mt-auto">
         <div class="max-w-7xl mx-auto px-6">
-            <p class="text-neutral-500 text-xs font-mono uppercase tracking-widest mb-2">
+            <div class="w-10 h-10 bg-neutral-900 rounded-lg flex items-center justify-center text-neutral-600 text-lg mx-auto mb-4">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <p class="text-neutral-500 text-[10px] font-mono uppercase tracking-widest mb-2">
                 &copy; 2026 Nano Banana Prompts
             </p>
             <p class="text-neutral-700 text-[10px]">
-                High Quality AI Prompts Gallery
+                Made for Creators. Powered by AI.
             </p>
         </div>
     </footer>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-[0_0_30px_rgba(250,204,21,0.5)] hidden items-center gap-3 z-50">
-        <i class="fa-solid fa-check-circle text-lg"></i>
-        <span class="uppercase tracking-wide text-sm">Prompt Copied!</span>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black pl-4 pr-6 py-3 rounded-full font-bold shadow-[0_0_40px_rgba(250,204,21,0.6)] hidden items-center gap-3 z-50 border border-white/20 backdrop-blur-md">
+        <div class="w-6 h-6 bg-black rounded-full flex items-center justify-center text-yellow-400 text-xs">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <span class="uppercase tracking-wide text-xs">Prompt Copied!</span>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- Config ---
         const firebaseConfig = {
              apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
              projectId: "prompt-gallery-64aa9"
@@ -202,7 +210,7 @@ body {
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- State ---
+        // State
         let allData = [];
         let filteredData = [];
         let currentPage = 1;
@@ -220,7 +228,6 @@ body {
         const searchInput = document.getElementById("searchInput");
         const tabs = document.querySelectorAll(".tab-btn");
 
-        // --- Fetch ---
         async function loadData() {
             try {
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"));
@@ -230,11 +237,10 @@ body {
                 applyFilters();
             } catch (error) {
                 console.error(error);
-                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-20">Error Loading Data</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-20 font-mono text-sm border border-red-900/50 bg-red-900/10 rounded-lg">Unable to connect to database.<br><span class="opacity-50 text-xs">Check console for details.</span></div>`;
             }
         }
 
-        // --- Filter ---
         function applyFilters() {
             let temp = currentCategory === "All" 
                 ? allData 
@@ -253,12 +259,11 @@ body {
             renderPagination();
         }
 
-        // --- Render Logic (Key Changes Here) ---
         function renderPagination() {
             grid.innerHTML = "";
 
             if (filteredData.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-20">NO PROMPTS FOUND</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-32 italic">No prompts match your search criteria.</div>`;
                 paginationControls.classList.add("hidden");
                 return;
             }
@@ -269,97 +274,103 @@ body {
             const pageData = filteredData.slice(startIndex, endIndex);
 
             pageData.forEach(item => {
-                // 1. Gather all images
+                // Image Handling
                 let images = [];
                 if (Array.isArray(item.preview) && item.preview.length > 0) images = item.preview;
                 else if (Array.isArray(item.images) && item.images.length > 0) images = item.images;
                 else if (typeof item.preview === 'string') images = [item.preview];
+                if(images.length === 0) images = ["https://via.placeholder.com/600x400/111/333?text=NO+IMAGE"];
 
-                // Placeholder if empty
-                if(images.length === 0) images = ["https://via.placeholder.com/400x300/111/333?text=NO+IMG"];
-
-                // 2. Prepare Thumbnails HTML
-                // - สร้างรูปเล็กๆ เรียงกัน
-                // - onmouseover ให้เปลี่ยนรูปใหญ่
+                // Create Thumbnails Strip
                 let thumbnailsHTML = '';
-                // Limit to 4 thumbnails to prevent overflow
-                images.slice(0, 4).forEach((img, idx) => {
-                    thumbnailsHTML += `
-                        <img src="${img}" 
-                             loading="lazy"
-                             onmouseover="document.getElementById('main-img-${item.id}').src='${img}'"
-                             class="w-9 h-9 object-cover rounded border-2 border-black/50 hover:border-yellow-400 cursor-pointer transition bg-black"
-                             alt="thumb-${idx}">
-                    `;
-                });
+                if (images.length > 1) {
+                    images.slice(0, 5).forEach((img, idx) => {
+                        const activeClass = idx === 0 ? 'border-yellow-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100 hover:border-white/50';
+                        thumbnailsHTML += `
+                            <img src="${img}" 
+                                 loading="lazy"
+                                 onmouseover="this.parentElement.previousElementSibling.previousElementSibling.src='${img}'; this.parentElement.querySelectorAll('img').forEach(i => i.classList.remove('border-yellow-500', 'opacity-100')); this.classList.add('border-yellow-500', 'opacity-100');"
+                                 class="w-8 h-8 object-cover rounded-md border-2 cursor-pointer transition-all duration-200 bg-neutral-900 ${activeClass}"
+                                 alt="thumb">
+                        `;
+                    });
+                }
 
-                // Safe Prompt
                 const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
-
+                
+                // Card HTML Structure
+                // Note: The <a> tag wraps the image and title for future linking
                 const card = document.createElement('article');
-                card.className = "card rounded-xl overflow-hidden flex flex-col h-full group";
+                card.className = "card-glass rounded-2xl overflow-hidden flex flex-col h-full group relative";
                 
                 card.innerHTML = `
-                    <div class="relative h-60 overflow-hidden bg-black border-b border-neutral-800">
-                        <img id="main-img-${item.id}" src="${images[0]}" 
+                    <a href="./view.html?id=${item.id}" class="block relative aspect-[4/3] overflow-hidden bg-black group-hover:brightness-110 transition duration-500">
+                        <img src="${images[0]}" 
                              alt="${item.title}" loading="lazy" 
-                             class="w-full h-full object-cover transition duration-700 opacity-90 group-hover:opacity-100">
+                             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100">
                         
-                        <div class="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-yellow-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-yellow-500/20 z-10">
+                        <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border border-white/10 shadow-lg group-hover:border-yellow-500/50 group-hover:text-yellow-400 transition">
                             ${item.category || "General"}
                         </div>
 
-                        <div class="absolute bottom-3 left-3 flex items-center gap-1.5 z-20 thumb-scroll overflow-x-auto max-w-[90%] pr-2">
+                        <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"></div>
+
+                        <div class="absolute bottom-3 left-4 right-4 flex items-center gap-1.5 z-20 gallery-scroll overflow-x-auto" onclick="event.preventDefault()">
                             ${thumbnailsHTML}
                         </div>
+                    </a>
 
-                        <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
-                    </div>
-
-                    <div class="p-5 flex flex-col flex-1">
-                        <h2 class="text-lg font-bold text-white mb-2 line-clamp-1" title="${item.title}">
-                            ${item.title || "Untitled"}
-                        </h2>
-                        <p class="text-neutral-500 text-xs mb-4 line-clamp-2 h-8 leading-relaxed">
-                            ${item.note || "No additional note."}
+                    <div class="p-5 flex flex-col flex-1 relative">
+                        <a href="./view.html?id=${item.id}" class="group-hover:text-yellow-400 transition-colors">
+                            <h2 class="text-lg font-bold text-white mb-1 line-clamp-1 leading-tight" title="${item.title}">
+                                ${item.title || "Untitled Prompt"}
+                            </h2>
+                        </a>
+                        
+                        <p class="text-neutral-500 text-xs mb-5 line-clamp-2 h-8 leading-relaxed font-medium">
+                            ${item.note || "No specific style notes."}
                         </p>
 
-                        <div class="prompt-code rounded p-3 mb-4 flex-1 relative overflow-hidden group/code cursor-pointer" 
+                        <div class="prompt-terminal rounded-lg p-4 pt-7 mb-5 flex-1 relative overflow-hidden group/code cursor-pointer shadow-inner bg-[#050505]" 
                              onclick="window.copyToClipboard(\`${safePrompt}\`)">
-                            <div class="text-[10px] text-neutral-400 font-mono leading-relaxed line-clamp-3 select-none">
+                            <div class="text-[11px] text-neutral-400 leading-relaxed line-clamp-3 select-none opacity-80 group-hover/code:opacity-100 transition">
                                 ${item.prompt || "// No prompt data available"}
                             </div>
-                            <div class="absolute inset-0 bg-yellow-400/10 opacity-0 group-hover/code:opacity-100 transition flex items-center justify-center backdrop-blur-[1px]">
-                                <span class="text-yellow-400 text-xs font-bold bg-black px-3 py-1 rounded border border-yellow-400">COPY</span>
+                            <div class="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover/code:opacity-100 transition flex items-center justify-center backdrop-blur-[1px]">
+                                <span class="text-yellow-400 text-xs font-bold bg-black px-4 py-1.5 rounded-full border border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)]">
+                                    <i class="fa-regular fa-copy mr-1"></i> COPY
+                                </span>
                             </div>
                         </div>
 
                         <button onclick="window.copyToClipboard(\`${safePrompt}\`)" 
-                            class="w-full bg-neutral-900 border border-neutral-700 text-neutral-300 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition flex items-center justify-center gap-2">
-                            <i class="fa-regular fa-copy"></i> Copy Prompt
+                            class="w-full bg-[#1a1a1a] border border-neutral-800 text-neutral-300 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition flex items-center justify-center gap-2 group/btn">
+                            <span>Copy Prompt</span>
+                            <i class="fa-solid fa-arrow-right -rotate-45 group-hover/btn:rotate-0 transition-transform duration-300"></i>
                         </button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
 
-            // Pagination Controls
-            pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+            // Pagination UI
+            pageInfo.innerText = `${currentPage} / ${totalPages}`;
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
+            
             if (totalPages > 1) paginationControls.classList.remove("hidden");
             else paginationControls.classList.add("hidden");
         }
 
-        // --- Event Listeners ---
+        // --- Listeners ---
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 tabs.forEach(t => {
-                    t.classList.remove("bg-yellow-400", "text-black");
-                    t.classList.add("bg-neutral-900", "text-neutral-400", "border-neutral-800");
+                    t.classList.remove("bg-yellow-400", "text-black", "shadow-[0_0_15px_rgba(250,204,21,0.2)]", "scale-105");
+                    t.classList.add("bg-[#1a1a1a]", "text-neutral-400", "border-neutral-800");
                 });
-                tab.classList.remove("bg-neutral-900", "text-neutral-400", "border-neutral-800");
-                tab.classList.add("bg-yellow-400", "text-black");
+                tab.classList.remove("bg-[#1a1a1a]", "text-neutral-400", "border-neutral-800");
+                tab.classList.add("bg-yellow-400", "text-black", "shadow-[0_0_15px_rgba(250,204,21,0.2)]", "scale-105");
                 currentCategory = tab.dataset.cat;
                 applyFilters();
             });
@@ -371,13 +382,10 @@ body {
             renderPagination();
         });
 
-        prevBtn.addEventListener("click", () => {
-            if (currentPage > 1) { currentPage--; renderPagination(); }
-        });
-
-        nextBtn.addEventListener("click", () => {
+        prevBtn.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderPagination(); window.scrollTo({top:0, behavior:'smooth'}); } });
+        nextBtn.addEventListener("click", () => { 
             const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            if (currentPage < totalPages) { currentPage++; renderPagination(); }
+            if (currentPage < totalPages) { currentPage++; renderPagination(); window.scrollTo({top:0, behavior:'smooth'}); } 
         });
 
         searchInput.addEventListener("input", (e) => {
@@ -390,11 +398,10 @@ body {
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById("toast");
                 toast.classList.add("toast-active");
-                setTimeout(() => toast.classList.remove("toast-active"), 2500);
+                setTimeout(() => toast.classList.remove("toast-active"), 2000);
             });
         };
 
-        // Start
         loadData();
     </script>
 </body>
