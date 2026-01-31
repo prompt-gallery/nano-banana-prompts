@@ -5,15 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Nano Banana Prompts - AI Prompt Gallery & Generator</title>
-    <meta name="description" content="Discover the best AI art prompts at Nano Banana Prompts. High-quality Midjourney, Stable Diffusion, and DALL-E prompts for photorealism, anime, and more.">
-    <meta name="keywords" content="nano banana prompts, ai prompts, midjourney prompts, stable diffusion, prompt gallery, ai art generator">
-    <meta name="author" content="Nano Banana">
-    <meta name="robots" content="index, follow">
+    <meta name="description" content="Discover the best AI art prompts at Nano Banana Prompts. High-quality Midjourney, Stable Diffusion, and DALL-E prompts.">
     
-    <meta property="og:title" content="Nano Banana Prompts - Premium AI Prompt Collection">
-    <meta property="og:description" content="Curated collection of high-quality AI prompts. Copy, paste, and create amazing art.">
-    <meta property="og:type" content="website">
-
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,8 +17,8 @@
         :root {
             --bg-body: #050505;
             --bg-card: #0f0f0f;
-            --accent: #FACC15; /* Yellow-400 */
-            --accent-hover: #EAB308; /* Yellow-500 */
+            --accent: #FACC15;
+            --accent-hover: #EAB308;
         }
 
         body { 
@@ -60,6 +53,10 @@
             border: 1px solid #222;
         }
 
+        /* Thumbnails Scrollbar (Hidden) */
+        .thumb-scroll::-webkit-scrollbar { display: none; }
+        .thumb-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
         /* Toast Animation */
         @keyframes slideUpFade {
             from { transform: translate(-50%, 20px); opacity: 0; }
@@ -91,7 +88,7 @@
 
             <div class="relative w-full md:w-80">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
-                <input type="text" id="searchInput" placeholder="Search Nano Banana Prompts..." 
+                <input type="text" id="searchInput" placeholder="Search prompts..." 
                        class="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-sm rounded-full py-2.5 pl-10 pr-4 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition placeholder-neutral-600">
             </div>
         </div>
@@ -143,7 +140,7 @@
                 &copy; 2026 Nano Banana Prompts
             </p>
             <p class="text-neutral-700 text-[10px]">
-                Optimized for Midjourney, Stable Diffusion & DALL-E
+                High Quality AI Prompts Gallery
             </p>
         </div>
     </footer>
@@ -157,9 +154,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- 1. CONFIGURATION ---
-        // ⚠️ แนะนำให้ใช้ไฟล์ firebase-config.json จริงๆ เพื่อความปลอดภัย
-        // แต่ถ้าจะทดสอบเลย ใช้ config ที่คุณให้มา
+        // --- Config ---
         const firebaseConfig = {
              apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
              projectId: "prompt-gallery-64aa9"
@@ -168,11 +163,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- 2. STATE MANAGEMENT ---
-        let allData = [];       // เก็บข้อมูลทั้งหมดจาก DB
-        let filteredData = [];  // เก็บข้อมูลที่ผ่านการกรอง (Search/Tabs)
+        // --- State ---
+        let allData = [];
+        let filteredData = [];
         let currentPage = 1;
-        let itemsPerPage = 30;  // Default 30
+        let itemsPerPage = 30;
         let currentCategory = "All";
         let searchTerm = "";
 
@@ -186,94 +181,108 @@
         const searchInput = document.getElementById("searchInput");
         const tabs = document.querySelectorAll(".tab-btn");
 
-        // --- 3. FETCH DATA ---
+        // --- Fetch ---
         async function loadData() {
             try {
-                // ดึงข้อมูลทั้งหมดทีเดียว (Client-side pagination เหมาะสำหรับข้อมูล < 5,000 รายการ)
-                // เพื่อความเร็วในการ Filter และเปลี่ยนหน้าโดยไม่ต้องโหลดใหม่
                 const q = query(collection(db, "prompts"), orderBy("created", "desc"));
                 const snap = await getDocs(q);
-                
                 allData = [];
-                snap.forEach(doc => {
-                    allData.push({ id: doc.id, ...doc.data() });
-                });
-
-                applyFilters(); // เริ่มต้นการแสดงผล
-
+                snap.forEach(doc => allData.push({ id: doc.id, ...doc.data() }));
+                applyFilters();
             } catch (error) {
-                console.error("Error:", error);
-                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-20 font-mono">ERROR LOADING DATA: ${error.message}</div>`;
+                console.error(error);
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-20">Error Loading Data</div>`;
             }
         }
 
-        // --- 4. FILTERING & SEARCH LOGIC ---
+        // --- Filter ---
         function applyFilters() {
-            // 1. Filter by Category
             let temp = currentCategory === "All" 
                 ? allData 
                 : allData.filter(item => item.category && item.category.toLowerCase() === currentCategory.toLowerCase());
 
-            // 2. Filter by Search
             if (searchTerm) {
                 const lowerTerm = searchTerm.toLowerCase();
                 temp = temp.filter(item => 
                     (item.title && item.title.toLowerCase().includes(lowerTerm)) || 
-                    (item.prompt && item.prompt.toLowerCase().includes(lowerTerm)) ||
-                    (item.note && item.note.toLowerCase().includes(lowerTerm))
+                    (item.prompt && item.prompt.toLowerCase().includes(lowerTerm))
                 );
             }
 
             filteredData = temp;
-            currentPage = 1; // รีเซ็ตไปหน้า 1 เสมอเมื่อฟิลเตอร์เปลี่ยน
+            currentPage = 1;
             renderPagination();
         }
 
-        // --- 5. RENDER & PAGINATION LOGIC ---
+        // --- Render Logic (Key Changes Here) ---
         function renderPagination() {
             grid.innerHTML = "";
 
             if (filteredData.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-20 font-mono italic">NO PROMPTS FOUND</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-20">NO PROMPTS FOUND</div>`;
                 paginationControls.classList.add("hidden");
                 return;
             }
 
-            // คำนวณหน้า
             const totalPages = Math.ceil(filteredData.length / itemsPerPage);
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const pageData = filteredData.slice(startIndex, endIndex);
 
-            // Render Items
             pageData.forEach(item => {
-                // จัดการรูปภาพ (รองรับ Array และ String)
-                let imgUrl = "https://via.placeholder.com/400x300/111/333?text=NANO+BANANA"; // Default Placeholder
-                if (Array.isArray(item.preview) && item.preview.length > 0) imgUrl = item.preview[0];
-                else if (Array.isArray(item.images) && item.images.length > 0) imgUrl = item.images[0];
-                else if (typeof item.preview === 'string') imgUrl = item.preview;
+                // 1. Gather all images
+                let images = [];
+                if (Array.isArray(item.preview) && item.preview.length > 0) images = item.preview;
+                else if (Array.isArray(item.images) && item.images.length > 0) images = item.images;
+                else if (typeof item.preview === 'string') images = [item.preview];
 
-                // Escape prompt
+                // Placeholder if empty
+                if(images.length === 0) images = ["https://via.placeholder.com/400x300/111/333?text=NO+IMG"];
+
+                // 2. Prepare Thumbnails HTML
+                // - สร้างรูปเล็กๆ เรียงกัน
+                // - onmouseover ให้เปลี่ยนรูปใหญ่
+                let thumbnailsHTML = '';
+                // Limit to 4 thumbnails to prevent overflow
+                images.slice(0, 4).forEach((img, idx) => {
+                    thumbnailsHTML += `
+                        <img src="${img}" 
+                             loading="lazy"
+                             onmouseover="document.getElementById('main-img-${item.id}').src='${img}'"
+                             class="w-9 h-9 object-cover rounded border-2 border-black/50 hover:border-yellow-400 cursor-pointer transition bg-black"
+                             alt="thumb-${idx}">
+                    `;
+                });
+
+                // Safe Prompt
                 const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
 
                 const card = document.createElement('article');
                 card.className = "card rounded-xl overflow-hidden flex flex-col h-full group";
+                
                 card.innerHTML = `
-                    <div class="relative h-56 overflow-hidden bg-black border-b border-neutral-800">
-                        <img src="${imgUrl}" alt="${item.title || 'Nano Banana Prompt'}" loading="lazy" 
-                             class="w-full h-full object-cover transition duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                    <div class="relative h-60 overflow-hidden bg-black border-b border-neutral-800">
+                        <img id="main-img-${item.id}" src="${images[0]}" 
+                             alt="${item.title}" loading="lazy" 
+                             class="w-full h-full object-cover transition duration-700 opacity-90 group-hover:opacity-100">
                         
-                        <div class="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-yellow-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-yellow-500/20">
+                        <div class="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-yellow-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-yellow-500/20 z-10">
                             ${item.category || "General"}
                         </div>
+
+                        <div class="absolute bottom-3 left-3 flex items-center gap-1.5 z-20 thumb-scroll overflow-x-auto max-w-[90%] pr-2">
+                            ${thumbnailsHTML}
+                        </div>
+
+                        <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
                     </div>
 
                     <div class="p-5 flex flex-col flex-1">
                         <h2 class="text-lg font-bold text-white mb-2 line-clamp-1" title="${item.title}">
-                            ${item.title || "Untitled Prompt"}
+                            ${item.title || "Untitled"}
                         </h2>
                         <p class="text-neutral-500 text-xs mb-4 line-clamp-2 h-8 leading-relaxed">
-                            ${item.note || "No additional description."}
+                            ${item.note || "No additional note."}
                         </p>
 
                         <div class="prompt-code rounded p-3 mb-4 flex-1 relative overflow-hidden group/code cursor-pointer" 
@@ -295,69 +304,48 @@
                 grid.appendChild(card);
             });
 
-            // Update Pagination UI
+            // Pagination Controls
             pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
-            
-            // Show/Hide Controls
             if (totalPages > 1) paginationControls.classList.remove("hidden");
             else paginationControls.classList.add("hidden");
-
-            // Scroll to top of grid smoothly
-            if(window.scrollY > 300) {
-               // document.getElementById('tabContainer').scrollIntoView({ behavior: 'smooth' });
-            }
         }
 
-        // --- 6. EVENT LISTENERS ---
-
-        // Tabs
+        // --- Event Listeners ---
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
-                // Update UI
                 tabs.forEach(t => {
                     t.classList.remove("bg-yellow-400", "text-black");
                     t.classList.add("bg-neutral-900", "text-neutral-400", "border-neutral-800");
                 });
                 tab.classList.remove("bg-neutral-900", "text-neutral-400", "border-neutral-800");
                 tab.classList.add("bg-yellow-400", "text-black");
-
                 currentCategory = tab.dataset.cat;
                 applyFilters();
             });
         });
 
-        // Pagination Size
         itemsPerPageSelect.addEventListener("change", (e) => {
             itemsPerPage = parseInt(e.target.value);
-            currentPage = 1; // Reset page
+            currentPage = 1;
             renderPagination();
         });
 
-        // Prev/Next Buttons
         prevBtn.addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderPagination();
-            }
+            if (currentPage > 1) { currentPage--; renderPagination(); }
         });
 
         nextBtn.addEventListener("click", () => {
             const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderPagination();
-            }
+            if (currentPage < totalPages) { currentPage++; renderPagination(); }
         });
 
-        // Search Input
         searchInput.addEventListener("input", (e) => {
             searchTerm = e.target.value.trim();
             applyFilters();
         });
 
-        // --- 7. UTILITIES ---
         window.copyToClipboard = (text) => {
             if(!text) return;
             navigator.clipboard.writeText(text).then(() => {
@@ -369,8 +357,6 @@
 
         // Start
         loadData();
-
     </script>
-
 </body>
 </html>
