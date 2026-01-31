@@ -191,14 +191,15 @@
         <button onclick="shareTwitter()" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center hover:scale-110 transition border border-neutral-700">
             <i class="fa-brands fa-x-twitter"></i>
         </button>
-        <button onclick="shareLine()" class="w-9 h-9 rounded-full bg-[#00c300] text-white flex items-center justify-center hover:scale-110 transition">
-            <i class="fa-brands fa-line"></i>
+        <button onclick="shareReddit()" class="w-9 h-9 rounded-full bg-[#ff4500] text-white flex items-center justify-center hover:scale-110 transition">
+            <i class="fa-brands fa-reddit-alien"></i>
         </button>
         <button onclick="copyShareLink()" class="w-9 h-9 rounded-full bg-neutral-800 text-white flex items-center justify-center hover:bg-yellow-400 hover:text-black transition">
             <i class="fa-solid fa-link"></i>
         </button>
     </div>
 </div>
+
 
                     </div>
 
@@ -241,17 +242,18 @@
 
     <script type="module">
 const currentUrl = window.location.href;
+const shareText = document.title;
 
 window.shareFacebook = () => {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, "_blank");
 };
 
 window.shareTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}`, "_blank");
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`, "_blank");
 };
 
-window.shareLine = () => {
-    window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(currentUrl)}`, "_blank");
+window.shareReddit = () => {
+    window.open(`https://www.reddit.com/submit?title=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`, "_blank");
 };
 
 window.copyShareLink = () => {
