@@ -448,20 +448,11 @@ function updateSEO(data) {
             if (!grid) return;
 
             try {
-                // 1. ดึงข้อมูล: ใช้ query แบบปลอดภัย
-                // หมายเหตุ: ถ้าข้อมูลใน DB ไม่มี field 'created' การใส่ orderBy จะทำให้ไม่เจอข้อมูลเลย
-                // ผมเลยใส่ try-catch ซ้อนเพื่อลองดึงแบบไม่เรียงลำดับดูถ้าแบบแรกพัง
-                let q = query(collection(db, "prompts"), orderBy("created", "desc"), limit(10));
-                let snap;
+                // 1. ดึงข้อมูลมาสัก 20 ตัว (ไม่เรียงวันที่ เพื่อป้องกัน Error เรื่อง Index หรือ Field หาย)
+                // การใช้ limit(20) เพื่อให้มี Pool ข้อมูลมากพอที่จะสุ่ม
+                const q = query(collection(db, "prompts"), limit(20));
                 
-                try {
-                    snap = await getDocs(q);
-                } catch (err) {
-                    console.warn("Sorting failed (missing 'created' field?), trying unsorted fetch...", err);
-                    // Fallback: ถ้าเรียงตามวันที่ไม่ได้ ให้ดึงมาเลย 8 ตัว
-                    const fallbackQ = query(collection(db, "prompts"), limit(10));
-                    snap = await getDocs(fallbackQ);
-                }
+                const snap = await getDocs(q);
                 
                 let related = [];
                 snap.forEach(doc => {
@@ -471,23 +462,26 @@ function updateSEO(data) {
                     }
                 });
 
-                // ตัดให้เหลือ 4 รายการ
+                // 2. สุ่มลำดับข้อมูล (Shuffle) เพื่อให้ดูไม่ซ้ำซาก
+                related = related.sort(() => 0.5 - Math.random());
+
+                // 3. ตัดให้เหลือแค่ 4 ตัว
                 related = related.slice(0, 4);
 
-                // 2. เคลียร์ Loading
+                // 4. เคลียร์ Loading... ทิ้ง
                 grid.innerHTML = "";
 
-                // 3. กรณีไม่มีข้อมูล
+                // 5. กรณีไม่มีข้อมูล
                 if (related.length === 0) {
                     grid.innerHTML = `
                         <div class="col-span-full text-center py-10 opacity-50">
-                            <i class="fa-regular fa-folder-open text-2xl mb-2"></i>
-                            <p class="text-xs font-mono">No other prompts found.</p>
+                            <i class="fa-regular fa-folder-open text-2xl mb-2 text-neutral-700"></i>
+                            <p class="text-xs font-mono text-neutral-600">No other prompts found.</p>
                         </div>`;
                     return;
                 }
 
-                // 4. วนลูปสร้าง Card
+                // 6. วนลูปสร้าง Card
                 related.forEach(item => {
                     const afterImgs = normalizeArr(item.after);
                     const beforeImgs = normalizeArr(item.before);
@@ -497,33 +491,29 @@ function updateSEO(data) {
                     if (afterImgs.length > 0) imgUrl = afterImgs[0];
                     else if (beforeImgs.length > 0) imgUrl = beforeImgs[0];
 
-                    // สร้าง HTML
+                    // สร้าง HTML Link
+                    // ใช้ ?id=... เพื่อให้ลิงก์อยู่หน้าเดิมแต่เปลี่ยน Content
                     const card = document.createElement("a");
-                    card.href = `index.html?id=${item.id}`; // ลิงก์กลับไปหน้า index โดยส่ง id ไป (หรือเปลี่ยนเป็น view.html ตามโครงสร้างไฟล์คุณ)
-                    
-                    // ถ้าไฟล์หน้านี้ชื่อ view.html ให้ใช้ card.href = `view.html?id=${item.id}`;
-                    // แต่ถ้าใช้หน้าเดียว (index.html) ให้ใช้ `?id=` เหมือนเดิม
                     card.href = `?id=${item.id}`; 
-
-                    card.className = "block bg-[#090909] border border-neutral-900 rounded-xl overflow-hidden group hover:border-neutral-700 transition shadow-lg relative";
+                    card.className = "block bg-[#090909] border border-neutral-900 rounded-xl overflow-hidden group hover:border-neutral-700 transition shadow-lg relative h-full flex flex-col";
                     
                     const imgHTML = imgUrl 
                         ? `<img src="${imgUrl}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700" loading="lazy">`
                         : `<div class="w-full h-full bg-[#080808] flex items-center justify-center"><i class="fa-solid fa-bolt text-neutral-800 text-2xl group-hover:text-yellow-500 transition"></i></div>`;
 
                     card.innerHTML = `
-                        <div class="h-40 overflow-hidden bg-black relative">
+                        <div class="h-32 sm:h-40 overflow-hidden bg-black relative shrink-0">
                             ${imgHTML}
                              <div class="absolute top-2 left-2 bg-black/80 backdrop-blur text-yellow-400 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-yellow-500/20 shadow-md">
                                 ${item.category || "General"}
                             </div>
                         </div>
-                        <div class="p-4">
-                            <h4 class="text-white text-sm font-bold truncate group-hover:text-yellow-400 transition">
+                        <div class="p-4 flex flex-col flex-1">
+                            <h4 class="text-white text-sm font-bold truncate group-hover:text-yellow-400 transition mb-1">
                                 ${item.title || "Untitled"}
                             </h4>
-                            <p class="text-neutral-500 text-[10px] mt-1 line-clamp-1 font-mono">
-                                ${item.note || "No description"}
+                            <p class="text-neutral-500 text-[10px] line-clamp-2 font-mono leading-relaxed">
+                                ${item.note || "No description provided."}
                             </p>
                         </div>
                     `;
@@ -532,7 +522,8 @@ function updateSEO(data) {
 
             } catch (e) {
                 console.error("Critical Error loading related:", e);
-                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs py-10 font-mono">Error: ${e.message}</div>`;
+                // แสดง Error ในหน้าเว็บเพื่อให้เรารู้ว่าพัง
+                grid.innerHTML = `<div class="col-span-full text-center text-red-900/50 text-xs py-10 font-mono">Unable to load suggestions.<br>(${e.message})</div>`;
             }
         }
 
