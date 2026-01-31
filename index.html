@@ -1,166 +1,376 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Nano Banana Prompt</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Nano Banana Prompts - AI Prompt Gallery & Generator</title>
+    <meta name="description" content="Discover the best AI art prompts at Nano Banana Prompts. High-quality Midjourney, Stable Diffusion, and DALL-E prompts for photorealism, anime, and more.">
+    <meta name="keywords" content="nano banana prompts, ai prompts, midjourney prompts, stable diffusion, prompt gallery, ai art generator">
+    <meta name="author" content="Nano Banana">
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:title" content="Nano Banana Prompts - Premium AI Prompt Collection">
+    <meta property="og:description" content="Curated collection of high-quality AI prompts. Copy, paste, and create amazing art.">
+    <meta property="og:type" content="website">
 
-<style>
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  font-family: Inter, system-ui, sans-serif;
-  background:#f6f7fb;
-  color:#111;
-}
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-header {
-  background:white;
-  padding:20px 40px;
-  border-bottom:1px solid #eee;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
+    <style>
+        /* Theme Configuration */
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --accent: #FACC15; /* Yellow-400 */
+            --accent-hover: #EAB308; /* Yellow-500 */
+        }
 
-h1 { margin:0; font-size:36px; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: #e5e5e5;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a00 0%, #050505 60%);
+        }
 
-.tabs {
-  display:flex;
-  gap:10px;
-  padding:20px 40px;
-}
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-.tab {
-  padding:8px 16px;
-  border-radius:20px;
-  background:#eee;
-  cursor:pointer;
-  font-size:14px;
-}
+        /* Card Styles */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid #222;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px -10px rgba(250, 204, 21, 0.15);
+        }
 
-.tab.active {
-  background:#111;
-  color:white;
-}
+        /* Prompt Box Code Style */
+        .prompt-code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #000;
+            border: 1px solid #222;
+        }
 
-.grid {
-  padding:40px;
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
-  gap:30px;
-}
-
-.card {
-  background:white;
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,0.08);
-  display:flex;
-  flex-direction:column;
-}
-
-.card img {
-  width:100%;
-  height:220px;
-  object-fit:cover;
-}
-
-.card-body {
-  padding:20px;
-  flex:1;
-}
-
-.category {
-  font-size:12px;
-  color:#3b82f6;
-  font-weight:600;
-  margin-bottom:6px;
-}
-
-.title {
-  font-size:20px;
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.desc {
-  font-size:14px;
-  color:#555;
-  margin-bottom:16px;
-}
-
-.prompt-box {
-  background:#f1f2f5;
-  padding:10px;
-  border-radius:10px;
-  font-size:12px;
-  color:#333;
-  height:60px;
-  overflow:hidden;
-}
-
-.copy-btn {
-  margin:15px;
-  border:none;
-  background:#111;
-  color:white;
-  padding:12px;
-  border-radius:30px;
-  cursor:pointer;
-  font-size:14px;
-}
-</style>
+        /* Toast Animation */
+        @keyframes slideUpFade {
+            from { transform: translate(-50%, 20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .toast-active {
+            display: flex !important;
+            animation: slideUpFade 0.3s forwards;
+        }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
+    <header class="border-b border-neutral-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 select-none">
+                <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-black text-xl shadow-[0_0_15px_rgba(250,204,21,0.4)]">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight uppercase leading-none">
+                        NANO<span class="text-yellow-400">BANANA</span>
+                    </h1>
+                    <span class="text-[10px] text-neutral-500 font-mono tracking-[0.3em] uppercase block mt-1">
+                        PROMPTS GALLERY
+                    </span>
+                </div>
+            </div>
 
-<header>
-  <h1>🍌 Nano Banana Prompt</h1>
-</header>
+            <div class="relative w-full md:w-80">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+                <input type="text" id="searchInput" placeholder="Search Nano Banana Prompts..." 
+                       class="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-sm rounded-full py-2.5 pl-10 pr-4 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition placeholder-neutral-600">
+            </div>
+        </div>
+    </header>
 
-<div class="tabs">
-  <div class="tab active">All</div>
-  <div class="tab">Photorealism</div>
-  <div class="tab">E-commerce</div>
-  <div class="tab">Social Media</div>
-</div>
+    <main class="flex-1 max-w-7xl mx-auto px-4 md:px-6 py-8 w-full">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="flex flex-wrap gap-2 justify-center md:justify-start" id="tabContainer">
+                <button class="tab-btn active bg-yellow-400 text-black px-5 py-2 rounded-full text-sm font-bold transition hover:bg-yellow-300" data-cat="All">All</button>
+                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="Photorealism">Photorealism</button>
+                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="Anime">Anime</button>
+                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="Landscape">Landscape</button>
+                <button class="tab-btn bg-neutral-900 text-neutral-400 border border-neutral-800 px-5 py-2 rounded-full text-sm font-bold transition hover:border-yellow-400 hover:text-white" data-cat="E-commerce">E-commerce</button>
+            </div>
 
-<div class="grid" id="grid"></div>
+            <div class="flex items-center gap-2 text-sm text-neutral-400">
+                <span>Show:</span>
+                <select id="itemsPerPage" class="bg-neutral-900 border border-neutral-800 text-white rounded px-2 py-1 focus:outline-none focus:border-yellow-400">
+                    <option value="30" selected>30</option>
+                    <option value="60">60</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="col-span-full text-center py-32">
+                <i class="fa-solid fa-circle-notch fa-spin text-5xl text-yellow-400 mb-4"></i>
+                <p class="text-neutral-500 font-mono text-sm tracking-widest">LOADING DATABASE...</p>
+            </div>
+        </div>
 
-const app = initializeApp({
-  apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
-  projectId: "prompt-gallery-64aa9"
-});
+        <div id="paginationControls" class="mt-12 flex justify-center items-center gap-4 hidden">
+            <button id="prevBtn" class="bg-neutral-900 border border-neutral-800 text-white px-4 py-2 rounded hover:border-yellow-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-chevron-left"></i> Prev
+            </button>
+            <span id="pageInfo" class="text-neutral-400 text-sm font-mono">Page 1 of 1</span>
+            <button id="nextBtn" class="bg-neutral-900 border border-neutral-800 text-white px-4 py-2 rounded hover:border-yellow-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                Next <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
 
-const db = getFirestore(app);
-const snap = await getDocs(collection(db, "prompts"));
+    </main>
 
-const grid = document.getElementById("grid");
+    <footer class="border-t border-neutral-800 bg-black py-10 text-center">
+        <div class="max-w-7xl mx-auto px-6">
+            <p class="text-neutral-500 text-xs font-mono uppercase tracking-widest mb-2">
+                &copy; 2026 Nano Banana Prompts
+            </p>
+            <p class="text-neutral-700 text-[10px]">
+                Optimized for Midjourney, Stable Diffusion & DALL-E
+            </p>
+        </div>
+    </footer>
 
-snap.forEach(doc => {
-  const d = doc.data();
-  const img = d.preview?.[0] || d.images?.[0] || "";
-
-  grid.innerHTML += `
-    <div class="card">
-      <img src="${img}">
-      <div class="card-body">
-        <div class="category">${d.category}</div>
-        <div class="title">${d.title}</div>
-        <div class="desc">${d.note || ""}</div>
-        <div class="prompt-box">${d.prompt}</div>
-      </div>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${d.prompt}\`)">
-        Copy Prompt
-      </button>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-[0_0_30px_rgba(250,204,21,0.5)] hidden items-center gap-3 z-50">
+        <i class="fa-solid fa-check-circle text-lg"></i>
+        <span class="uppercase tracking-wide text-sm">Prompt Copied!</span>
     </div>
-  `;
-});
-</script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- 1. CONFIGURATION ---
+        // ⚠️ แนะนำให้ใช้ไฟล์ firebase-config.json จริงๆ เพื่อความปลอดภัย
+        // แต่ถ้าจะทดสอบเลย ใช้ config ที่คุณให้มา
+        const firebaseConfig = {
+             apiKey: "AIzaSyBCtYBO5ukNw83levVZNf6n68_kmPrJNxc",
+             projectId: "prompt-gallery-64aa9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 2. STATE MANAGEMENT ---
+        let allData = [];       // เก็บข้อมูลทั้งหมดจาก DB
+        let filteredData = [];  // เก็บข้อมูลที่ผ่านการกรอง (Search/Tabs)
+        let currentPage = 1;
+        let itemsPerPage = 30;  // Default 30
+        let currentCategory = "All";
+        let searchTerm = "";
+
+        // Elements
+        const grid = document.getElementById("grid");
+        const paginationControls = document.getElementById("paginationControls");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const pageInfo = document.getElementById("pageInfo");
+        const itemsPerPageSelect = document.getElementById("itemsPerPage");
+        const searchInput = document.getElementById("searchInput");
+        const tabs = document.querySelectorAll(".tab-btn");
+
+        // --- 3. FETCH DATA ---
+        async function loadData() {
+            try {
+                // ดึงข้อมูลทั้งหมดทีเดียว (Client-side pagination เหมาะสำหรับข้อมูล < 5,000 รายการ)
+                // เพื่อความเร็วในการ Filter และเปลี่ยนหน้าโดยไม่ต้องโหลดใหม่
+                const q = query(collection(db, "prompts"), orderBy("created", "desc"));
+                const snap = await getDocs(q);
+                
+                allData = [];
+                snap.forEach(doc => {
+                    allData.push({ id: doc.id, ...doc.data() });
+                });
+
+                applyFilters(); // เริ่มต้นการแสดงผล
+
+            } catch (error) {
+                console.error("Error:", error);
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-20 font-mono">ERROR LOADING DATA: ${error.message}</div>`;
+            }
+        }
+
+        // --- 4. FILTERING & SEARCH LOGIC ---
+        function applyFilters() {
+            // 1. Filter by Category
+            let temp = currentCategory === "All" 
+                ? allData 
+                : allData.filter(item => item.category && item.category.toLowerCase() === currentCategory.toLowerCase());
+
+            // 2. Filter by Search
+            if (searchTerm) {
+                const lowerTerm = searchTerm.toLowerCase();
+                temp = temp.filter(item => 
+                    (item.title && item.title.toLowerCase().includes(lowerTerm)) || 
+                    (item.prompt && item.prompt.toLowerCase().includes(lowerTerm)) ||
+                    (item.note && item.note.toLowerCase().includes(lowerTerm))
+                );
+            }
+
+            filteredData = temp;
+            currentPage = 1; // รีเซ็ตไปหน้า 1 เสมอเมื่อฟิลเตอร์เปลี่ยน
+            renderPagination();
+        }
+
+        // --- 5. RENDER & PAGINATION LOGIC ---
+        function renderPagination() {
+            grid.innerHTML = "";
+
+            if (filteredData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center text-neutral-600 py-20 font-mono italic">NO PROMPTS FOUND</div>`;
+                paginationControls.classList.add("hidden");
+                return;
+            }
+
+            // คำนวณหน้า
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            // Render Items
+            pageData.forEach(item => {
+                // จัดการรูปภาพ (รองรับ Array และ String)
+                let imgUrl = "https://via.placeholder.com/400x300/111/333?text=NANO+BANANA"; // Default Placeholder
+                if (Array.isArray(item.preview) && item.preview.length > 0) imgUrl = item.preview[0];
+                else if (Array.isArray(item.images) && item.images.length > 0) imgUrl = item.images[0];
+                else if (typeof item.preview === 'string') imgUrl = item.preview;
+
+                // Escape prompt
+                const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
+
+                const card = document.createElement('article');
+                card.className = "card rounded-xl overflow-hidden flex flex-col h-full group";
+                card.innerHTML = `
+                    <div class="relative h-56 overflow-hidden bg-black border-b border-neutral-800">
+                        <img src="${imgUrl}" alt="${item.title || 'Nano Banana Prompt'}" loading="lazy" 
+                             class="w-full h-full object-cover transition duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                        
+                        <div class="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-yellow-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-yellow-500/20">
+                            ${item.category || "General"}
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex flex-col flex-1">
+                        <h2 class="text-lg font-bold text-white mb-2 line-clamp-1" title="${item.title}">
+                            ${item.title || "Untitled Prompt"}
+                        </h2>
+                        <p class="text-neutral-500 text-xs mb-4 line-clamp-2 h-8 leading-relaxed">
+                            ${item.note || "No additional description."}
+                        </p>
+
+                        <div class="prompt-code rounded p-3 mb-4 flex-1 relative overflow-hidden group/code cursor-pointer" 
+                             onclick="window.copyToClipboard(\`${safePrompt}\`)">
+                            <div class="text-[10px] text-neutral-400 font-mono leading-relaxed line-clamp-3 select-none">
+                                ${item.prompt || "// No prompt data available"}
+                            </div>
+                            <div class="absolute inset-0 bg-yellow-400/10 opacity-0 group-hover/code:opacity-100 transition flex items-center justify-center backdrop-blur-[1px]">
+                                <span class="text-yellow-400 text-xs font-bold bg-black px-3 py-1 rounded border border-yellow-400">COPY</span>
+                            </div>
+                        </div>
+
+                        <button onclick="window.copyToClipboard(\`${safePrompt}\`)" 
+                            class="w-full bg-neutral-900 border border-neutral-700 text-neutral-300 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i> Copy Prompt
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Update Pagination UI
+            pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+            
+            // Show/Hide Controls
+            if (totalPages > 1) paginationControls.classList.remove("hidden");
+            else paginationControls.classList.add("hidden");
+
+            // Scroll to top of grid smoothly
+            if(window.scrollY > 300) {
+               // document.getElementById('tabContainer').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // --- 6. EVENT LISTENERS ---
+
+        // Tabs
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                // Update UI
+                tabs.forEach(t => {
+                    t.classList.remove("bg-yellow-400", "text-black");
+                    t.classList.add("bg-neutral-900", "text-neutral-400", "border-neutral-800");
+                });
+                tab.classList.remove("bg-neutral-900", "text-neutral-400", "border-neutral-800");
+                tab.classList.add("bg-yellow-400", "text-black");
+
+                currentCategory = tab.dataset.cat;
+                applyFilters();
+            });
+        });
+
+        // Pagination Size
+        itemsPerPageSelect.addEventListener("change", (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            currentPage = 1; // Reset page
+            renderPagination();
+        });
+
+        // Prev/Next Buttons
+        prevBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPagination();
+            }
+        });
+
+        nextBtn.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPagination();
+            }
+        });
+
+        // Search Input
+        searchInput.addEventListener("input", (e) => {
+            searchTerm = e.target.value.trim();
+            applyFilters();
+        });
+
+        // --- 7. UTILITIES ---
+        window.copyToClipboard = (text) => {
+            if(!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.classList.add("toast-active");
+                setTimeout(() => toast.classList.remove("toast-active"), 2500);
+            });
+        };
+
+        // Start
+        loadData();
+
+    </script>
 
 </body>
 </html>
