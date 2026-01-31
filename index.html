@@ -5,34 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Nano Banana Prompts | AI Prompt Gallery & Generator</title>
-    <meta name="description" content="Nano Banana Prompts is a curated AI prompt gallery and generator. Discover creative styles, save prompts, and generate stunning AI content.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://prompt-gallery.github.io/nano-banana-prompts/">
-
-    <meta property="og:title" content="Nano Banana Prompts | AI Prompt Gallery & Generator">
-    <meta property="og:description" content="A curated AI prompt gallery and generator. Explore styles, save prompts, and generate stunning AI results.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://prompt-gallery.github.io/nano-banana-prompts/">
-    <meta property="og:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Nano Banana Prompts">
-    <meta name="twitter:description" content="A modern AI prompt gallery and generator for creative content.">
-    <meta name="twitter:image" content="https://prompt-gallery.github.io/nano-banana-prompts/og-cover.jpg">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Nano Banana Prompts",
-      "url": "https://prompt-gallery.github.io/nano-banana-prompts/",
-      "description": "A curated AI prompt gallery and generator for creative content.",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Nano Banana Prompts"
-      }
-    }
-    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -145,7 +117,7 @@
                         NANO<span class="text-yellow-400">BANANA</span>
                     </h1>
                     <span class="text-[10px] text-neutral-500 font-mono tracking-[0.3em] uppercase block">
-                        Gallery v2.0
+                        Gallery v2.1
                     </span>
                 </div>
             </div>
@@ -157,8 +129,8 @@
             </div>
         </div>
     </header>
-	
-<main class="flex-1 max-w-[1400px] mx-auto px-4 md:px-6 py-10 w-full z-10">
+    
+    <main class="flex-1 max-w-[1400px] mx-auto px-4 md:px-6 py-10 w-full z-10">
         
         <div class="flex flex-col lg:flex-row justify-between items-center mb-10 gap-6">
             <div class="flex flex-wrap gap-2 justify-center lg:justify-start" id="tabContainer">
@@ -185,7 +157,7 @@
                     <i class="fa-solid fa-circle-notch fa-spin text-5xl text-neutral-800"></i>
                     <i class="fa-solid fa-bolt text-xl text-yellow-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
                 </div>
-                <p class="text-neutral-600 font-mono text-xs tracking-[0.3em] mt-4 uppercase">Initializing System...</p>
+                <p class="text-neutral-600 font-mono text-xs tracking-[0.3em] mt-4 uppercase">Loading Database...</p>
             </div>
         </div>
 
@@ -219,8 +191,8 @@
         <i class="fa-solid fa-check text-lg"></i>
         <span class="uppercase tracking-wide text-xs">Prompt Copied</span>
     </div>
-	
-	<script type="module">
+    
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -283,8 +255,8 @@
             currentPage = 1;
             renderPagination();
         }
-		
-		// Render Logic (UPDATED: Fixed Image Sources)
+        
+        // Render Logic (UPDATED: Using 'after' and 'before' fields)
         function renderPagination() {
             grid.innerHTML = "";
 
@@ -300,30 +272,30 @@
             const pageData = filteredData.slice(startIndex, endIndex);
 
             pageData.forEach(item => {
-                // 1. MAIN IMAGE (PREVIEW / AFTER) 
-                // ดึงจาก field 'preview' เท่านั้น
-                let previewSrc = null;
-                if (Array.isArray(item.preview) && item.preview.length > 0) previewSrc = item.preview[0];
-                else if (typeof item.preview === 'string' && item.preview) previewSrc = item.preview;
+                // 1. MAIN IMAGE (AFTER) 
+                // ดึงจาก field 'after' (แทน preview เดิม)
+                let mainImageSrc = null;
+                if (Array.isArray(item.after) && item.after.length > 0) mainImageSrc = item.after[0];
+                else if (typeof item.after === 'string' && item.after) mainImageSrc = item.after;
                 
-                // Fallback: ถ้าไม่มี preview ให้ใช้รูปแรกของ images หรือ Placeholder
-                if (!previewSrc) {
-                    if (Array.isArray(item.images) && item.images.length > 0) previewSrc = item.images[0];
-                    else previewSrc = ""; // Empty implies no image
+                // Fallback: ถ้าไม่มี after ให้ใช้ before หรือว่าง
+                if (!mainImageSrc) {
+                    if (Array.isArray(item.before) && item.before.length > 0) mainImageSrc = item.before[0];
+                    else mainImageSrc = ""; 
                 }
 
-                // 2. THUMBNAILS (IMAGES / BEFORE)
-                // ดึงจาก field 'images' เท่านั้น
+                // 2. THUMBNAILS (BEFORE)
+                // ดึงจาก field 'before' (แทน images เดิม)
                 let thumbImages = [];
-                if (Array.isArray(item.images) && item.images.length > 0) thumbImages = item.images;
+                if (Array.isArray(item.before) && item.before.length > 0) thumbImages = item.before;
                 
                 // === HTML GENERATION ===
 
                 // Main Image HTML
                 let mainImageHTML;
-                if (previewSrc) {
+                if (mainImageSrc) {
                     mainImageHTML = `
-                        <img src="${previewSrc}" 
+                        <img src="${mainImageSrc}" 
                              alt="${item.title}" loading="lazy" 
                              class="main-img w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">
                     `;
@@ -331,21 +303,20 @@
                     mainImageHTML = `
                         <div class="w-full h-full flex flex-col items-center justify-center bg-[#080808] group-hover:bg-[#0a0a0a] transition">
                             <i class="fa-solid fa-bolt text-4xl text-neutral-800 group-hover:text-yellow-500/50 transition duration-500"></i>
-                            <span class="text-[10px] font-mono text-neutral-700 mt-2 tracking-widest uppercase group-hover:text-neutral-500">No Preview</span>
+                            <span class="text-[10px] font-mono text-neutral-700 mt-2 tracking-widest uppercase group-hover:text-neutral-500">No Image</span>
                         </div>
                     `;
                 }
 
-                // Thumbnails HTML
+                // Thumbnails HTML (Ref images from 'before')
                 let thumbnailsHTML = '';
                 if (thumbImages.length > 0) {
                     thumbImages.slice(0, 5).forEach((img, idx) => {
-                        // รูปเล็กมาจาก images
                         thumbnailsHTML += `
                             <img src="${img}" 
                                  loading="lazy"
                                  onmouseover="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${img}'"
-                                 onmouseout="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${previewSrc}'"
+                                 onmouseout="this.parentElement.parentElement.parentElement.querySelector('.main-img').src='${mainImageSrc}'"
                                  class="w-8 h-8 object-cover rounded-sm border border-neutral-800 hover:border-yellow-500 cursor-pointer transition bg-black"
                                  alt="ref-img">
                         `;
@@ -357,7 +328,7 @@
                 // Safe prompt string
                 const safePrompt = (item.prompt || "").replace(/"/g, '&quot;').replace(/`/g, '\\`');
                 
-                // Link
+                // Link (สมมติว่ามีหน้า view.html ถ้าไม่มีให้แก้ href="#" หรือเอา a tag ออก)
                 const detailLink = `view.html?id=${item.id}`; 
 
                 const card = document.createElement('article');
@@ -413,8 +384,8 @@
             if (totalPages > 1) paginationControls.classList.remove("hidden");
             else paginationControls.classList.add("hidden");
         }
-		
-		// Listeners
+        
+        // Listeners
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 tabs.forEach(t => {
